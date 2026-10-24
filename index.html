@@ -1143,7 +1143,7 @@ function cfgFormat(t) {
       ${field('Format des sets', sel('scoring.sets.type', [['bestof', 'Au meilleur de…'], ['fixed', 'Nombre de sets fixe']], `data-rr ${dis}`))}
       ${field(sc.sets.type === 'bestof' ? 'Nombre de sets max.' : 'Sets joués', inp('scoring.sets.count', `min="1" max="9" data-rr ${dis}`, 'number'))}
       ${field('Points par set', inp('scoring.sets.points', 'min="1"', 'number'))}
-      ${sc.sets.type === 'bestof' ? field('Set décisif en', inp('scoring.sets.lastPoints', 'min="1"', 'number')) : ''}
+      ${sc.sets.type === 'bestof' && Number(sc.sets.count) > 1 ? field('Set décisif en', inp('scoring.sets.lastPoints', 'min="1"', 'number')) : ''}
       ${field('Plafond (0 = aucun)', inp('scoring.sets.cap', 'min="0"', 'number'))}</div>
       <label class="check">${inp('scoring.sets.lead2', '', 'checkbox')} Deux points d'écart nécessaires</label>
       ${sc.sets.type === 'fixed' && !sc.allowDraw ? '<p class="muted small">Égalité de sets : le match est attribué à l\'équipe qui a marqué le plus de points.</p>' : ''}
@@ -1230,7 +1230,7 @@ function fmtBlock(t, ph, tb, path, dis) {
   const fs = sets && f.on ? field('Format des sets', sel(`${path}.fmt.sets.type`, [['bestof', 'Au meilleur de…'], ['fixed', 'Sets fixes']], `data-rr ${dis}`))
     + field(f.sets.type === 'bestof' ? 'Sets max.' : 'Sets joués', inp(`${path}.fmt.sets.count`, `min="1" max="9" data-rr ${dis} style="width:70px"`, 'number'))
     + field('Points par set', inp(`${path}.fmt.sets.points`, `min="1" ${dis} style="width:70px"`, 'number'))
-    + (f.sets.type === 'bestof' ? field('Set décisif en', inp(`${path}.fmt.sets.lastPoints`, `min="1" ${dis} style="width:70px"`, 'number')) : '') : '';
+    + (f.sets.type === 'bestof' && Number(f.sets.count) > 1 ? field('Set décisif en', inp(`${path}.fmt.sets.lastPoints`, `min="1" ${dis} style="width:70px"`, 'number')) : '') : '';
   const defDur = Number(ph.duration) || t.schedule.duration;
   return `<div class="fmt"><label class="check">${inp(`${path}.fmt.on`, `data-rr ${dis}`, 'checkbox')} ${sets ? 'Format de match spécifique' : 'Durée de match spécifique'}</label>
     ${f.on ? `<div class="fields">${fs}${tb ? field('Durée des matchs (min)', inp(`${path}.fmt.duration`, `min="1" placeholder="${defDur}" data-rr style="width:80px"`, 'number')) : ''}</div>`
@@ -1386,8 +1386,10 @@ function openMatch(id) {
   mmUpdate();
 }
 const vnum = id => { const el = document.getElementById(id); return el ? num(el.value) : null; };
+/* score à atteindre dans le set i : le set décisif n'existe que s'il y a plusieurs sets */
+const setTarget = (s, i) => s.type === 'bestof' && Number(s.count) > 1 && i === Number(s.count) - 1 ? Number(s.lastPoints) || Number(s.points) : Number(s.points);
 function setWarn(s, i, a, b) {
-  const target = s.type === 'bestof' && i === s.count - 1 ? Number(s.lastPoints) || Number(s.points) : Number(s.points);
+  const target = setTarget(s, i);
   const hi = Math.max(a, b), lo = Math.min(a, b), cap = Number(s.cap) || 0;
   if (cap && hi > cap) return `set ${i + 1} : au-delà du plafond (${cap})`;
   if (hi < target) return `set ${i + 1} : aucune équipe n'atteint ${target}`;
@@ -1400,7 +1402,7 @@ function setWarn(s, i, a, b) {
    (17 → 25 ; 24 → 26 avec deux points d'écart). Au-delà du score cible, c'est ambigu : on ne devine pas. */
 function guessOther(s, i, v) {
   if (v == null || v < 0) return null;
-  const target = s.type === 'bestof' && i === s.count - 1 ? Number(s.lastPoints) || Number(s.points) : Number(s.points), cap = Number(s.cap) || 0;
+  const target = setTarget(s, i), cap = Number(s.cap) || 0;
   if (v <= target - 2) return target;
   if (v === target - 1) return s.lead2 ? (cap && target + 1 > cap ? cap : target + 1) : target;
   return null;
