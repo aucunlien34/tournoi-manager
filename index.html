@@ -219,10 +219,128 @@ body.display #app{max-width:none;padding:0;height:100vh;display:flex;flex-direct
 .podium .blk{background:#1a2843;border-radius:1vh 1vh 0 0;margin-top:1vh;display:flex;align-items:flex-start;justify-content:center;font-size:7vh;padding-top:1vh}
 .d-empty{display:flex;align-items:center;justify-content:center;height:100%;font-size:4vh;color:#8fa0bb;text-align:center}
 
+/* match en cours, estimation, formats */
+.badge.live{background:var(--danger-soft);color:var(--danger)}
+.mrow.live{border-color:var(--danger);box-shadow:0 0 0 1px var(--danger)}
+.d-court.live{border-color:#e05555;box-shadow:0 0 0 2px #e05555 inset}
+.d-live{color:#ff7a7a;animation:blink 1.6s infinite}
+@keyframes blink{50%{opacity:.45}}
+.est{display:flex;gap:28px;flex-wrap:wrap;margin-top:8px}
+.est>div{display:flex;flex-direction:column}
+.est b{font-size:17px}
+.est.big b{font-size:22px;color:var(--accent)}
+.est-card{border-left:4px solid var(--ok)}
+.fmt{margin:4px 0 8px}
+.tab-fmt{flex-basis:100%}
+.tab-fmt .fmt{margin:0}
+
+/* export PDF */
+#print{display:none;--text:#000;--muted:#555;--line:#cfd5de;--panel:#fff;--chip:#eef1f5;color:#000;background:#fff;font-size:11px;line-height:1.3}
+#print.measure{display:block;position:absolute;left:-10000px;top:0;width:186mm}
+.pp-probe{height:273mm;width:1px}
+.pp{width:186mm;padding:0}
+.pp-head{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid #000;padding-bottom:6px;margin-bottom:10px}
+.pp-t{font-size:18px;font-weight:800}
+.pp-ph{font-size:16px;font-weight:800}
+.pp-s{font-size:10px;color:#555}
+.pp-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pp-box{border:1px solid #cfd5de;border-radius:6px;padding:8px;margin-bottom:10px;break-inside:avoid}
+.pp-box h4{font-size:13px;margin-bottom:4px}
+.pp-box th,.pp-box td{padding:2px 4px;font-size:10.5px}
+.pp-res{margin-top:6px}
+.pp-res td{border-bottom:1px solid #eceff3}
+.pp-res td.b{font-weight:700}
+.pp .sm{font-size:9.5px;color:#555}
+.pp-round{font-weight:700;font-size:10.5px;margin-top:6px;color:#333}
+.pp-final td{font-size:14px;padding:5px 8px}
+.pp .tm i{width:8px;height:8px}
+.pp-court table td{border-bottom:1px solid #9aa3af;padding:3mm 2mm;vertical-align:middle;font-size:12px}
+.pp-court td.r{text-align:right}
+.pp-court td.mid{white-space:nowrap;text-align:center;width:1%}
+.pp-court td.lab{width:24mm}
+.pp-court td.ref{width:26mm}
+.pp-court .tm-a,.pp-court .tm-b{font-size:13px;width:30%}
+.pp-court .bx{display:inline-block;width:13mm;height:10mm;border:1.6px solid #000;border-radius:2px;vertical-align:middle;text-align:center;line-height:10mm;font-size:15px;font-weight:700}
+.pp-court .bx.s{width:8mm;height:7.5mm;line-height:7.5mm;font-size:11px;margin:0 1px}
+.pp-court .dash{margin:0 2mm;font-weight:700}
+.pp-court .sets-bx{display:flex;flex-direction:column;gap:1.2mm}
+.pp-court .sets-bx>div{display:flex;align-items:center;gap:1mm}
+.pp-court .sets-bx .sm{width:5mm}
+.pp-court .ph{color:#555;font-style:italic;font-size:11px}
+.pp-court .wl{border-bottom:1px dotted #000;height:6mm;min-width:28mm}
+
+/* téléphone et tablette */
+.plan-list{display:none}
+@media (max-width:1024px){
+  #app{padding:0 12px 60px}
+  .mrow{grid-template-columns:90px minmax(90px,1fr) minmax(260px,2fr) 120px}
+}
+@media (max-width:820px){
+  .top-actions .badge{display:none}
+  .grid2{grid-template-columns:1fr}
+}
+@media (max-width:700px){
+  body{font-size:15px}
+  input,select,textarea{font-size:16px}
+  #app{padding:0 10px 70px}
+  .hide-sm{display:none!important}
+  .top{padding:10px 0 6px;gap:6px}
+  .top h1{font-size:18px}
+  .top .ttl{min-width:0;flex-basis:calc(100% - 110px)}
+  .top-actions{width:100%;flex-wrap:nowrap}
+  .top-actions button{flex:1;padding:8px 6px}
+  .tabs{position:sticky;top:0;background:var(--bg);z-index:5;margin:0 -10px 12px;padding:0 4px;scrollbar-width:none}
+  .tabs button{padding:11px 10px;font-size:14px}
+  .subtabs{flex-wrap:nowrap;overflow-x:auto;margin:0 -10px 12px;padding:0 10px 4px;scrollbar-width:none}
+  .card{padding:12px;border-radius:8px}
+  .stepper{grid-template-columns:1fr}
+  .filters select{flex:1 1 45%}
+  .mrow{grid-template-columns:1fr;gap:3px;padding:9px 10px}
+  .mmeta,.mlabel{font-size:12px}
+  .mlabel{order:-1}
+  .mteams{gap:6px;font-size:14px}
+  .mref{text-align:left}
+  .hero{padding:20px 0 10px}
+  .hero h1{font-size:23px}
+  .tcards{grid-template-columns:1fr}
+  button{padding:9px 12px}
+  button.sm{padding:6px 10px}
+  button.icon{min-width:36px}
+  .fields{gap:10px}
+  .fields .field{min-width:calc(50% - 5px);flex:1}
+  .tab-row{flex-direction:column;align-items:stretch}
+  .tab-row .spacer{display:none}
+  .team-row{gap:6px}
+  .team-row .seed{width:22px}
+  .bcol{min-width:78vw}
+  .bracket{scroll-snap-type:x mandatory}
+  .bcol{scroll-snap-align:start}
+  th,td{padding:6px 5px}
+  .overlay{padding:0;align-items:stretch}
+  .modal{border-radius:0;min-height:100%;padding:14px 14px 0;display:flex;flex-direction:column}
+  .modal .actions{position:sticky;bottom:0;background:var(--panel);padding:10px 0 14px;margin-top:auto;border-top:1px solid var(--line)}
+  .modal .actions button{flex:1 1 40%}
+  .modal .actions .spacer{display:none}
+  .mm-teams{font-size:15px}
+  .score-in input{font-size:32px;padding:12px}
+  .sets-in{max-width:none}
+  .sets-in input{font-size:22px;padding:11px}
+  .plan-grid{display:none}
+  .plan-list{display:block}
+  .est{gap:16px}
+  .est.big b{font-size:19px}
+  .toast{bottom:12px;width:calc(100% - 24px);text-align:center}
+}
 @media print{
   .tabs,.subtabs,.top-actions,.no-print,.filters,button{display:none!important}
   body{background:#fff;color:#000}
   .card,.mrow,.pm{box-shadow:none;break-inside:avoid}
+  body.printing #app,body.printing #modal,body.printing #confirm,body.printing .toast,body.printing .pp-probe{display:none!important}
+  body.printing #print{display:block}
+  body.printing{background:#fff}
+  @page{size:A4 portrait;margin:12mm}
+  .pp{break-after:page}
+  .pp:last-of-type{break-after:auto}
 }
 </style>
 </head>
@@ -230,6 +348,7 @@ body.display #app{max-width:none;padding:0;height:100vh;display:flex;flex-direct
 <div id="app"></div>
 <div id="modal"></div>
 <div id="confirm"></div>
+<div id="print"></div>
 <input type="file" id="importFile" accept=".json,application/json" hidden>
 <script>
 'use strict';
@@ -300,7 +419,7 @@ function persist() {
 function save() { const t = T(); if (t) t.updatedAt = Date.now(); invalidate(); persist(); maybeBackup(); }
 function getBackups() { try { return JSON.parse(localStorage.getItem(BKEY)) || []; } catch (e) { return []; } }
 function backup(label, t = T()) {
-  if (!t) return;
+  if (!t || SIM) return;
   let list = getBackups();
   list.unshift({ ts: Date.now(), tid: t.id, name: t.name, label, data: JSON.stringify(t) });
   const per = {}; list = list.filter(b => (per[b.tid] = (per[b.tid] || 0) + 1) <= 8).slice(0, 24);
@@ -403,7 +522,7 @@ const TEMPLATES = [
 function newTournament(name) {
   const t = { id: uid(), name: name || 'Nouveau tournoi', date: todayISO(), place: '', createdAt: Date.now(), updatedAt: Date.now(),
     sport: '', scoring: {}, points: {}, tiebreakers: [], teams: [], phases: [], matches: [],
-    schedule: { start: '09:00', duration: 15, changeover: 5, courts: ['Terrain 1', 'Terrain 2'], breaks: [], rest: true, courtMode: 'free', referee: false },
+    schedule: { start: '09:00', duration: 15, changeover: 5, courts: ['Terrain 1', 'Terrain 2'], breaks: [], rest: true, finalAlone: true, freeEntry: false, courtMode: 'free', referee: false },
     display: { rotate: 15 } };
   applySport(t, 'football'); setTeamCount(t, 8); t.phases = TEMPLATES[1].f(8);
   return t;
@@ -440,8 +559,26 @@ function matchLabel(t, m, withPhase = true) {
   if (isKO(m) && ph.tableaux.length > 1 && ph.tableaux[m.tableau]) l = `${ph.tableaux[m.tableau].name} · ${l}`;
   return withPhase && t.phases.length > 1 ? `${ph.name} · ${l}` : l;
 }
+/* format effectif d'un match : général, surchargé par la phase puis par le tableau */
+function scoringFor(t, ph, ti) {
+  const base = t.scoring;
+  if (base.mode !== 'sets' || !ph) return base;
+  const tb = ti != null && ph.tableaux ? ph.tableaux[ti] : null;
+  const ov = Object.assign({}, ph.fmt && ph.fmt.on ? ph.fmt.sets : null, tb && tb.fmt && tb.fmt.on ? tb.fmt.sets : null);
+  if (!Object.keys(ov).length) return base;
+  const sets = Object.assign({}, base.sets, ov);
+  return Object.assign({}, base, { sets, forfeitSetPoints: Number(base.forfeitSetPoints) === Number(base.sets.points) ? sets.points : base.forfeitSetPoints });
+}
+const scoringOf = (t, m) => scoringFor(t, phOf(t, m), m.tableau);
+function matchDur(t, m) {
+  const ph = phOf(t, m), tb = m.tableau != null && ph.tableaux ? ph.tableaux[m.tableau] : null;
+  return Number(tb && tb.fmt && tb.fmt.on && tb.fmt.duration) || Number(ph.duration) || Number(t.schedule.duration) || 15;
+}
+const matchLen = (t, m) => matchDur(t, m) + (Number(t.schedule.changeover) || 0);
+const fmtDuration = m => `${Math.floor(m / 60)} h ${pad(Math.round(m % 60))}`;
+function setsFormatLabel(s) { return `${s.type === 'bestof' ? 'au meilleur de ' + s.count : s.count} set${s.count > 1 ? 's' : ''} de ${s.points} pts${s.type === 'bestof' && s.count > 1 && Number(s.lastPoints) !== Number(s.points) ? ` (décisif en ${s.lastPoints})` : ''}`; }
 function sideData(t, m) {
-  const sc = t.scoring, A = { sc: 0, co: 0, sw: 0, sl: 0 }, B = { sc: 0, co: 0, sw: 0, sl: 0 };
+  const sc = scoringOf(t, m), A = { sc: 0, co: 0, sw: 0, sl: 0 }, B = { sc: 0, co: 0, sw: 0, sl: 0 };
   if (m.forfeit) {
     const W = m.forfeit === 'a' ? B : A;
     if (sc.mode === 'sets') { const need = sc.sets.type === 'bestof' ? Math.ceil(sc.sets.count / 2) : sc.sets.count; W.sw = need; W.sc = need * (Number(sc.forfeitSetPoints) || 0); }
@@ -455,9 +592,10 @@ function sideData(t, m) {
 }
 function pointsFor(t, m, side, d) {
   const P = t.points, sets = t.scoring.mode === 'sets', me = d[side], op = d[side === 'a' ? 'b' : 'a'];
-  const tbl = k => { const v = P.setsTable[k]; return v == null ? 0 : Number(v); };
-  if (m.forfeit) return m.forfeit === side ? Number(P.forfeit) : (sets && P.useSetsTable ? tbl(`${me.sw}-${me.sl}`) : Number(P.win));
-  if (sets && P.useSetsTable) return tbl(`${me.sw}-${me.sl}`);
+  // barème par score de sets ; si la phase joue un autre nombre de sets, retour au barème victoire/nul/défaite
+  const tv = P.useSetsTable && sets ? P.setsTable[`${me.sw}-${me.sl}`] : null, hasTv = tv != null && tv !== '';
+  if (m.forfeit) return m.forfeit === side ? Number(P.forfeit) : hasTv ? Number(tv) : Number(P.win);
+  if (hasTv) return Number(tv);
   let p = m.winner === 'draw' ? Number(P.draw) : m.winner === side ? Number(P.win) : Number(P.loss);
   if (!sets) {
     const diff = me.sc - op.sc;
@@ -728,45 +866,90 @@ function phaseStartTime(t, i) {
     if (m.time == null) continue;
     const p = phOf(t, m), idx = t.phases.indexOf(p);
     if (idx >= i) continue;
-    const e = m.time + slotLen(t, p); if (end == null || e > end) end = e;
+    const e = m.time + matchLen(t, m); if (end == null || e > end) end = e;
   }
   return end ?? parseTime(t.schedule.start) ?? 540;
 }
 function refCounts(t) { const c = {}; t.matches.forEach(m => { if (m.referee) c[m.referee] = (c[m.referee] || 0) + 1; }); return c; }
 function poolIndexOf(ph, id) { if (!ph.pools) return -1; return ph.pools.findIndex(p => p.teamIds.includes(id)); }
-function scheduleList(t, ph, list, start) {
-  const S = t.schedule, nc = Math.max(1, S.courts.length), len = slotLen(t, ph), dur = len - (Number(S.changeover) || 0);
-  const pending = list.slice(), inList = new Set(list.map(m => m.id)), slotOf = new Map(), lastPlay = new Map();
-  list.forEach(m => m.referee = null);
-  const rc = refCounts(t); let lastRefs = new Set();
-  let time = fitTime(t, start, dur), si = 0, guard = 0;
-  while (pending.length && guard++ < 5000) {
-    const busy = new Set(), used = new Array(nc).fill(false), chosen = [];
-    const pick = strict => {
+/* Planification par créneaux. À chaque créneau, on choisit parmi les matchs jouables ceux qui
+   équilibrent le temps de jeu : priorité aux équipes qui attendent depuis le plus longtemps,
+   pénalité pour deux créneaux d'affilée et pour l'avance sur l'ordre des journées/tours.
+   Le calcul est relancé avec de petites variations aléatoires (graine fixe) et le meilleur
+   planning est retenu : moins de créneaux, puis moins d'enchaînements, puis attentes plus courtes.
+   La finale du tableau principal est jouée seule, au dernier créneau. */
+function planSlots(t, ph, list, rng) {
+  const S = t.schedule, nc = Math.max(1, S.courts.length);
+  const pending = list.slice(), order = new Map(list.map((m, i) => [m.id, i])), slotOf = new Map(), lastPlay = new Map(), slots = [];
+  const mainFrom = ph.ranges && ph.ranges[0] ? ph.ranges[0][0] : 1;
+  const isFinal = m => m.tableau === 0 && m.size === 2 && m.ps === mainFrom;
+  const holdFinal = S.finalAlone !== false && list.filter(isFinal).length === 1 && list.length > 1;
+  const depsOf = m => [m.a, m.b].filter(s => s && !s.t).map(s => s.w || s.l).filter(id => order.has(id));
+  const teamsOf = m => [m.a, m.b].map(teamOf).filter(Boolean);
+  let si = 0, b2b = 0;
+  while (pending.length && si < 5000) {
+    const busy = new Set(), used = new Array(nc).fill(false), chosen = [], minRound = {};
+    pending.forEach(m => { const k = m.pool != null ? 'p' + m.pool : 't' + m.tableau; minRound[k] = Math.min(minRound[k] ?? 1e9, m.round); });
+    const restOf = m => {           // créneaux de repos de chaque équipe (connue ou issue d'un match précédent)
+      const r = teamsOf(m).map(x => lastPlay.has(x) ? si - lastPlay.get(x) - 1 : si + 1);
+      depsOf(m).forEach(d => r.push(si - slotOf.get(d) - 1));
+      return r;
+    };
+    const score = m => {
+      let s = 0;
+      for (const r of restOf(m)) s += r === 0 ? -100 : Math.min(r, 6) * 10;
+      s -= (m.round - minRound[m.pool != null ? 'p' + m.pool : 't' + m.tableau]) * 25;
+      return s - order.get(m.id) * 0.01 + (rng ? rng() * 30 : 0);
+    };
+    const playable = m => !(holdFinal && isFinal(m) && pending.length > 1) && !depsOf(m).some(d => !slotOf.has(d) || slotOf.get(d) >= si);
+    // repos imposé seulement s'il existe au moins un match jouable sans enchaînement ; sinon on remplit les terrains
+    const strict = S.rest && pending.some(m => playable(m) && !restOf(m).some(r => r === 0));
+    while (chosen.length < nc) {
+      let best = null, bestS = -Infinity, bestC = -1;
       for (const m of pending) {
-        if (chosen.length >= nc) break;
-        if (chosen.includes(m)) continue;
-        const deps = [m.a, m.b].filter(s => s && !s.t).map(s => s.w || s.l).filter(id => inList.has(id));
-        if (deps.some(d => !slotOf.has(d) || slotOf.get(d) >= si)) continue;
-        const tms = [m.a, m.b].map(teamOf).filter(Boolean);
-        if (tms.some(x => busy.has(x))) continue;
-        if (strict && S.rest && (tms.some(x => lastPlay.get(x) === si - 1) || deps.some(d => slotOf.get(d) === si - 1))) continue;
+        if (chosen.some(x => x.m === m)) continue;
+        if (holdFinal && pending.length === 1 && chosen.length) break;
+        if (!playable(m)) continue;
+        if (teamsOf(m).some(x => busy.has(x))) continue;
+        if (strict && restOf(m).some(r => r === 0)) continue;
         let c;
         if (S.courtMode === 'pool' && m.pool != null) { c = m.pool % nc; if (used[c]) continue; }
         else { c = used.indexOf(false); if (c < 0) break; }
-        used[c] = true; m._c = c; chosen.push(m); tms.forEach(x => busy.add(x));
+        const sc = score(m);
+        if (sc > bestS) { best = m; bestS = sc; bestC = c; }
       }
-    };
-    pick(true); if (!chosen.length) pick(false);
-    for (const m of chosen) {
-      m.time = time; m.court = m._c; delete m._c; slotOf.set(m.id, si);
-      [m.a, m.b].map(teamOf).filter(Boolean).forEach(x => lastPlay.set(x, si));
-      pending.splice(pending.indexOf(m), 1);
+      if (!best) break;
+      if (restOf(best).some(r => r === 0)) b2b++;
+      used[bestC] = true; chosen.push({ m: best, c: bestC });
+      teamsOf(best).forEach(x => busy.add(x));
+      if (holdFinal && isFinal(best)) break;
     }
+    chosen.forEach(({ m }) => { slotOf.set(m.id, si); teamsOf(m).forEach(x => lastPlay.set(x, si)); pending.splice(pending.indexOf(m), 1); });
+    slots.push(chosen); si++;
+  }
+  // attente la plus longue de chaque équipe, en créneaux
+  const seen = {};
+  slots.forEach((ch, i) => ch.forEach(({ m }) => teamsOf(m).forEach(x => (seen[x] = seen[x] || []).push(i))));
+  let worst = 0, sq = 0;
+  Object.values(seen).forEach(s => { let w = 0; for (let k = 1; k < s.length; k++) w = Math.max(w, s[k] - s[k - 1] - 1); worst = Math.max(worst, w); sq += w * w; });
+  return { slots, cost: [slots.length, b2b, worst, sq] };
+}
+function scheduleList(t, ph, list, start) {
+  const S = t.schedule, chg = Number(S.changeover) || 0, baseDur = Number(ph.duration) || Number(S.duration) || 15;
+  let seed = 12345;
+  const rng = () => (seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648;
+  let best = planSlots(t, ph, list, null);
+  const tries = list.length > 300 ? 8 : 40;
+  for (let k = 0; k < tries; k++) { const p = planSlots(t, ph, list, rng); if (cmpArr(p.cost, best.cost) < 0) best = p; }
+  list.forEach(m => m.referee = null);
+  const rc = refCounts(t); let lastRefs = new Set();
+  let time = fitTime(t, start, baseDur);
+  for (const chosen of best.slots) {
+    chosen.forEach(({ m, c }) => { m.time = time; m.court = c; });
     if (S.referee && chosen.length) {
-      const excl = new Set(); chosen.forEach(m => { possibleTeams(m.a, excl); possibleTeams(m.b, excl); });
+      const excl = new Set(); chosen.forEach(({ m }) => { possibleTeams(m.a, excl); possibleTeams(m.b, excl); });
       const now = new Set();
-      for (const m of chosen) {
+      for (const { m } of chosen) {
         if (!teamOf(m.a) || !teamOf(m.b)) continue;
         const cand = (ph.seeds || []).filter(x => !excl.has(x) && !now.has(x));
         if (!cand.length) continue;
@@ -776,7 +959,8 @@ function scheduleList(t, ph, list, start) {
       }
       lastRefs = now;
     }
-    time = fitTime(t, time + len, dur); si++;
+    const step = chosen.length ? Math.max(...chosen.map(({ m }) => matchDur(t, m))) + chg : baseDur + chg;
+    time = fitTime(t, time + step, baseDur);
   }
 }
 function assignPendingRefs(t) {
@@ -799,9 +983,45 @@ function replan(t, start) {
     const list = phaseMatches(t, ph).filter(m => !m.done).sort((a, b) => (a.time ?? 1e9) - (b.time ?? 1e9) || (a.num || 0) - (b.num || 0));
     if (!list.length) return;
     scheduleList(t, ph, list, s);
-    s = Math.max(...list.map(m => m.time + slotLen(t, ph)));
+    s = Math.max(...list.map(m => m.time + matchLen(t, m)));
   });
   assignPendingRefs(t);
+}
+/* estimation : on joue le tournoi « à blanc » sur une copie (phases restantes générées, matchs non joués
+   considérés comme joués) avec le vrai planificateur, pauses, repos et durées par phase compris */
+let SIM = false, _est = { key: null, val: null };
+function estimateTournament(t) {
+  const key = t.id + ':' + JSON.stringify([t.updatedAt, t.teams.length, t.schedule, t.scoring.sets, t.phases.map(p => [p.type, p.nbPools, p.roundTrip, p.distribution, p.levels, p.duration, p.start, p.tableaux, p.fmt, p.status])]);
+  if (_est.key === key) return _est.val;
+  const clone = JSON.parse(JSON.stringify(t)), had = t.id in db.tournaments, real = db.tournaments[t.id], cur = db.currentId;
+  let val = null;
+  SIM = true; db.tournaments[t.id] = clone; db.currentId = t.id; invalidate();
+  try {
+    const finish = ph => phaseMatches(clone, ph).sort((a, b) => a.time - b.time).forEach(m => { if (!m.done) { m.done = true; m.winner = 'a'; m.score = [1, 0]; m.sets = []; m.forfeit = null; invalidate(); } });
+    for (let i = 0; i < clone.phases.length; i++) {
+      const ph = clone.phases[i];
+      if (ph.status === 'draft') {
+        if (ph.type === 'bracket' && !ph.tableaux.some(tb => tableauRange(tb, clone.teams.length))) break;
+        generatePhase(clone, i);
+      }
+      finish(ph);
+    }
+    const ms = clone.matches.filter(m => m.time != null);
+    if (ms.length) {
+      const start = Math.min(...ms.map(m => m.time)), end = Math.max(...ms.map(m => m.time + matchDur(clone, m)));
+      val = { start, end, count: ms.length, phases: clone.phases.map(ph => { const p = phaseMatches(clone, ph); return p.length ? { n: p.length, start: Math.min(...p.map(m => m.time)), end: Math.max(...p.map(m => m.time + matchDur(clone, m))) } : null; }) };
+    }
+  } catch (e) { console.error(e); val = null; }
+  finally { if (had) db.tournaments[t.id] = real; else delete db.tournaments[t.id]; db.currentId = cur; SIM = false; invalidate(); }
+  _est = { key, val };
+  return val;
+}
+function estimateHTML(t, big) {
+  const e = estimateTournament(t);
+  if (!e) return '<span class="muted">Estimation impossible avec cette configuration.</span>';
+  return `<div class="est ${big ? 'big' : ''}"><div><span class="muted small">Durée estimée</span><b>${fmtDuration(e.end - e.start)}</b></div>
+    <div><span class="muted small">Horaires</span><b>${fmtTime(e.start)} → ${fmtTime(e.end)}</b></div>
+    <div><span class="muted small">Matchs</span><b>${e.count}</b></div></div>`;
 }
 function dependents(t, id, acc = []) {
   t.matches.forEach(x => { if ([x.a, x.b].some(s => s && (s.w === id || s.l === id)) && !acc.includes(x)) { acc.push(x); dependents(t, x.id, acc); } });
@@ -819,11 +1039,12 @@ function toast(msg, ms = 2600) {
 }
 function showModal(html) { document.getElementById('modal').innerHTML = `<div class="overlay" data-overlay="1"><div class="modal">${html}</div></div>`; const f = document.querySelector('#modal [autofocus]'); if (f) { f.focus(); f.select && f.select(); } }
 function closeModal() { document.getElementById('modal').innerHTML = ''; ui.mm = null; }
-function askConfirm(msg, ok = 'Confirmer', danger = true) {
+let confirmChecked = false;
+function askConfirm(msg, ok = 'Confirmer', danger = true, checkLabel = '') {
   return new Promise(res => {
     const box = document.getElementById('confirm');
-    box.innerHTML = `<div class="overlay"><div class="modal"><h3>Confirmation</h3><div>${msg}</div><div class="actions"><button data-c="0">Annuler</button><button data-c="1" class="${danger ? 'primary' : 'primary'}">${esc(ok)}</button></div></div></div>`;
-    box.querySelectorAll('[data-c]').forEach(b => b.onclick = () => { box.innerHTML = ''; res(b.dataset.c === '1'); });
+    box.innerHTML = `<div class="overlay"><div class="modal"><h3>Confirmation</h3><div>${msg}</div>${checkLabel ? `<label class="check" style="margin-top:12px"><input type="checkbox" id="cfChk">${esc(checkLabel)}</label>` : ''}<div class="actions"><button data-c="0">Annuler</button><button data-c="1" class="primary">${esc(ok)}</button></div></div></div>`;
+    box.querySelectorAll('[data-c]').forEach(b => b.onclick = () => { const c = box.querySelector('#cfChk'); confirmChecked = !!(c && c.checked); box.innerHTML = ''; res(b.dataset.c === '1'); });
     box.querySelector('[data-c="1"]').focus();
   });
 }
@@ -880,7 +1101,7 @@ function viewTournament() {
   const body = { config: viewConfig, matches: viewMatches, standings: viewStandings, bracket: viewBrackets, planning: viewPlanning, final: viewFinal }[ui.tab](t);
   return `<header class="top"><button class="ghost" data-act="home">‹ Tournois</button>
     <div class="ttl"><h1>${esc(t.name)}</h1><div class="muted small">${esc((SPORTS[t.sport] || SPORTS.other).name)} · ${t.teams.length} équipes${t.date ? ' · ' + fmtDate(t.date) : ''}${t.place ? ' · ' + esc(t.place) : ''}</div></div>
-    <div class="row top-actions">${tStatusBadge(t)}<button data-act="display">📺 Écran public</button><button data-act="backups">💾 Sauvegardes${fileHandle ? ' ✓' : ''}</button></div></header>
+    <div class="row top-actions">${tStatusBadge(t)}<button data-act="display" class="hide-sm">📺 Écran public</button><button data-act="pdf">📄 PDF</button><button data-act="backups">💾 Sauvegardes${fileHandle ? ' ✓' : ''}</button></div></header>
     <nav class="tabs">${tabs.map(([k, l]) => `<button class="${ui.tab === k ? 'on' : ''}" data-act="tab" data-k="${k}">${l}</button>`).join('')}</nav>
     <main>${body}</main>`;
 }
@@ -935,7 +1156,9 @@ function cfgFormat(t) {
     ${sets ? `<label class="check">${inp('points.useSetsTable', 'data-rr', 'checkbox')} Points selon le score en sets</label>` : ''}
     ${sets && P.useSetsTable ? `<table style="max-width:300px"><tr><th class="l">Score en sets</th><th>Points</th></tr>
       ${setsKeys(t).map(k => `<tr><td class="l">${k.replace('-', ' – ')}</td><td><input type="number" data-type="num" data-bind="points.setsTable.${k}" value="${esc(P.setsTable[k])}" style="width:80px"></td></tr>`).join('')}</table>
-      <div class="fields" style="margin-top:12px">${field('Défaite par forfait', inp('points.forfeit', '', 'number'))}</div>`
+      <div class="fields" style="margin-top:12px">${field('Défaite par forfait', inp('points.forfeit', '', 'number'))}</div>
+      ${t.phases.some(ph => (ph.fmt && ph.fmt.on) || ph.tableaux && ph.tableaux.some(tb => tb.fmt && tb.fmt.on)) ? `<p class="muted small">Pour les phases jouées dans un autre format de sets, si un score n'est pas dans ce tableau :</p>
+      <div class="fields">${field('Victoire', inp('points.win', '', 'number'))}${sc.allowDraw ? field('Match nul', inp('points.draw', '', 'number')) : ''}${field('Défaite', inp('points.loss', '', 'number'))}</div>` : ''}`
     : `<div class="fields">${field('Victoire', inp('points.win', '', 'number'))}${sc.allowDraw ? field('Match nul', inp('points.draw', '', 'number')) : ''}${field('Défaite', inp('points.loss', '', 'number'))}${field('Défaite par forfait', inp('points.forfeit', '', 'number'))}</div>`}
     ${!sets ? `<h3 style="margin-top:8px">Bonus (optionnel)</h3>
       <label class="check">${inp('points.bonusOff.on', 'data-rr', 'checkbox')} Bonus offensif</label>
@@ -990,24 +1213,42 @@ function cfgPhases(t) {
       });
     }
   });
-  let total = 0, end = parseTime(t.schedule.start) ?? 540;
-  t.phases.forEach(ph => { const m = estimateMatches(t, ph); total += m; end += Math.ceil(m / Math.max(1, t.schedule.courts.length)) * slotLen(t, ph); });
   return `${!st ? `<div class="card"><h3>Modèles de déroulement</h3><div class="chips">${TEMPLATES.map(x => `<button data-act="tplApply" data-k="${x.k}">${esc(x.l)}</button>`).join('')}</div>
     <p class="muted small">Un modèle remplace les phases ci-dessous ; vous pouvez ensuite tout ajuster.</p></div>` : ''}
+    <div class="card est-card"><div class="row"><h3 class="grow" style="margin:0">Estimation du tournoi</h3><span class="muted small">simulation du planning : terrains, durées, pauses, repos, ordre des phases</span></div>${estimateHTML(t, true)}</div>
     ${msgs.map(m => `<div class="note warn">${esc(m)}</div>`).join('')}
     ${t.phases.map((ph, i) => phaseCard(t, ph, i)).join('')}
-    <div class="row no-print"><button data-act="phaseAdd" data-k="pools">+ Phase de poules</button><button data-act="phaseAdd" data-k="bracket">+ Phase finale (tableaux)</button></div>
-    <div class="card" style="margin-top:14px"><b>Estimation :</b> ${total} matchs au total sur ${t.schedule.courts.length} terrain(s), fin vers <b>${fmtTime(end)}</b> <span class="muted small">(hors pauses et arbitrage)</span></div>`;
+    <div class="row no-print"><button data-act="phaseAdd" data-k="pools">+ Phase de poules</button><button data-act="phaseAdd" data-k="bracket">+ Phase finale (tableaux)</button></div>`;
+}
+/* bloc « format spécifique » d'une phase (ph) ou d'un tableau (ph + tb) */
+function fmtBlock(t, ph, tb, path, dis) {
+  const sets = t.scoring.mode === 'sets', obj = tb || ph;
+  if (!sets && !tb) return '';
+  if (!obj.fmt) obj.fmt = { on: false, sets: Object.assign({}, scoringFor(t, tb ? ph : null).sets), duration: '' };
+  const f = obj.fmt;
+  const fs = sets && f.on ? field('Format des sets', sel(`${path}.fmt.sets.type`, [['bestof', 'Au meilleur de…'], ['fixed', 'Sets fixes']], `data-rr ${dis}`))
+    + field(f.sets.type === 'bestof' ? 'Sets max.' : 'Sets joués', inp(`${path}.fmt.sets.count`, `min="1" max="9" data-rr ${dis} style="width:70px"`, 'number'))
+    + field('Points par set', inp(`${path}.fmt.sets.points`, `min="1" ${dis} style="width:70px"`, 'number'))
+    + (f.sets.type === 'bestof' ? field('Set décisif en', inp(`${path}.fmt.sets.lastPoints`, `min="1" ${dis} style="width:70px"`, 'number')) : '') : '';
+  const defDur = Number(ph.duration) || t.schedule.duration;
+  return `<div class="fmt"><label class="check">${inp(`${path}.fmt.on`, `data-rr ${dis}`, 'checkbox')} ${sets ? 'Format de match spécifique' : 'Durée de match spécifique'}</label>
+    ${f.on ? `<div class="fields">${fs}${tb ? field('Durée des matchs (min)', inp(`${path}.fmt.duration`, `min="1" placeholder="${defDur}" data-rr style="width:80px"`, 'number')) : ''}</div>`
+      : sets ? `<div class="muted small">${tb ? 'Format de la phase' : 'Format général'} : ${esc(setsFormatLabel(scoringFor(t, tb ? ph : null).sets))}</div>` : ''}</div>`;
 }
 function phaseCard(t, ph, i) {
   const draft = ph.status === 'draft', dis = draft ? '' : 'disabled', p = `phases.${i}`;
+  const fdis = phaseMatches(t, ph).some(m => m.done) ? 'disabled' : '';
   const status = draft ? '<span class="badge">À générer</span>' : phaseComplete(t, ph) ? '<span class="badge ok">Terminée</span>' : '<span class="badge act">En cours</span>';
+  const e = estimateTournament(t), pe = e && e.phases[i];
+  const when = pe ? ` · ≈ ${fmtTime(pe.start)} → ${fmtTime(pe.end)} (${fmtDuration(pe.end - pe.start)})` : '';
   const head = `<div class="phase-head"><span class="badge">Phase ${i + 1}</span><input class="pname" data-bind="${p}.name" value="${esc(ph.name)}">${status}
     ${draft ? `<button class="icon sm" data-act="phaseMove" data-i="${i}" data-d="-1" ${i === 0 || t.phases[i - 1].status !== 'draft' ? 'disabled' : ''}>↑</button>
     <button class="icon sm" data-act="phaseMove" data-i="${i}" data-d="1" ${i === t.phases.length - 1 ? 'disabled' : ''}>↓</button>
     <button class="icon sm danger" data-act="phaseDel" data-i="${i}">✕</button>` : ''}</div>`;
-  const timing = `<div class="fields">${field('Durée des matchs (min, vide = défaut)', inp(`${p}.duration`, `min="1" placeholder="${t.schedule.duration}" ${dis}`, 'number'))}
-    ${field('Heure de début (vide = à la suite)', inp(`${p}.start`, dis, 'time'))}</div>`;
+  const timing = `<div class="fields">${field('Durée des matchs (min, vide = défaut)', inp(`${p}.duration`, `min="1" placeholder="${t.schedule.duration}" data-rr`, 'number'))}
+    ${field('Heure de début (vide = à la suite)', inp(`${p}.start`, `data-rr ${dis}`, 'time'))}</div>
+    ${fmtBlock(t, ph, null, p, fdis)}`;
+  const replanNote = !draft ? '<div class="muted small">Après un changement de durée, utilisez « Replanifier » dans l\'onglet Planning.</div>' : '';
   if (ph.type === 'pools') {
     const distOpts = i === 0 ? [['serpentine', 'Équilibrée selon l\'ordre des équipes (serpentin)'], ['level', 'Par niveau (les premières ensemble)'], ['random', 'Tirage au sort']]
       : [['serpentine', 'Mélangée : serpentin selon le classement précédent'], ['level', 'Par niveau : les mieux classées ensemble'], ['random', 'Tirage au sort']];
@@ -1016,10 +1257,10 @@ function phaseCard(t, ph, i) {
       ${field('Répartition des équipes', sel(`${p}.distribution`, distOpts, `data-rr ${dis}`))}</div>
       <label class="check">${inp(`${p}.roundTrip`, `data-rr ${dis}`, 'checkbox')} Matchs aller-retour</label>
       <label class="check">${inp(`${p}.levels`, `data-rr ${dis}`, 'checkbox')} Poules de niveau : la poule 1 est la plus forte (le classement de la phase suit l'ordre des poules)</label>
-      ${timing}<div class="muted small">${phaseInfo(t, ph, i)}${!draft ? ' · composition modifiable dans l\'onglet Matchs tant qu\'aucun score n\'est saisi' : ''}</div></div>`;
+      ${timing}${replanNote}<div class="muted small">${phaseInfo(t, ph, i)}${when}${!draft ? ' · composition modifiable dans l\'onglet Matchs tant qu\'aucun score n\'est saisi' : ''}</div></div>`;
   }
   return `<div class="card phase-card pbracket">${head}
-    <p class="muted small" style="margin-top:0">Chaque tableau reçoit une plage du classement de la phase précédente${i === 0 ? ' (ici : l\'ordre des équipes)' : ''}. Ajoutez un 2e tableau pour une consolante / tableau B.</p>
+    <p class="muted small" style="margin-top:0">Chaque tableau reçoit une plage du classement de la phase précédente${i === 0 ? ' (ici : l\'ordre des équipes)' : ''}. Ajoutez un 2e tableau pour une consolante / tableau B. Chaque tableau peut avoir son propre format.</p>
     ${ph.tableaux.map((tb, j) => `<div class="tab-row">
       ${field('Nom', `<input data-bind="${p}.tableaux.${j}.name" value="${esc(tb.name)}" ${dis}>`)}
       ${field('Du rang', inp(`${p}.tableaux.${j}.from`, `min="1" data-rr ${dis} style="width:70px"`, 'number'))}
@@ -1027,10 +1268,11 @@ function phaseCard(t, ph, i) {
       <div><label class="check">${inp(`${p}.tableaux.${j}.full`, `data-rr ${dis}`, 'checkbox')} Matchs de classement pour toutes les places</label>
       ${!tb.full ? `<label class="check">${inp(`${p}.tableaux.${j}.third`, `data-rr ${dis}`, 'checkbox')} Petite finale (3e place)</label>` : ''}</div>
       <span class="spacer"></span><span class="muted small">${countBracketMatches(tb, t.teams.length)} matchs</span>
-      ${draft ? `<button class="icon sm danger" data-act="tabDel" data-i="${i}" data-j="${j}">✕</button>` : ''}</div>`).join('')}
+      ${draft ? `<button class="icon sm danger" data-act="tabDel" data-i="${i}" data-j="${j}">✕</button>` : ''}
+      <div class="tab-fmt">${fmtBlock(t, ph, tb, `${p}.tableaux.${j}`, fdis)}</div></div>`).join('')}
     ${draft ? `<button class="sm" data-act="tabAdd" data-i="${i}">+ Ajouter un tableau (consolante…)</button>` : ''}
-    <div style="margin-top:10px">${timing}</div>
-    <div class="muted small">${phaseInfo(t, ph, i)} · les équipes hors tableaux gardent leur rang de la phase précédente.</div></div>`;
+    <div style="margin-top:10px">${timing}</div>${replanNote}
+    <div class="muted small">${phaseInfo(t, ph, i)}${when} · les équipes hors tableaux gardent leur rang de la phase précédente.</div></div>`;
 }
 function cfgSched(t) {
   const S = t.schedule;
@@ -1040,17 +1282,21 @@ function cfgSched(t) {
     ${field('Battement entre matchs (min)', inp('schedule.changeover', 'min="0" data-rr', 'number'))}</div>
     <p class="muted small">Un créneau toutes les ${slotLen(t, null)} minutes.</p>
     <h3>Pauses</h3>
-    ${(S.breaks || []).map((b, i) => `<div class="row" style="margin-bottom:6px">De ${inp(`schedule.breaks.${i}.from`, '', 'time')} à ${inp(`schedule.breaks.${i}.to`, '', 'time')}<button class="icon sm danger" data-act="breakDel" data-i="${i}">✕</button></div>`).join('')}
+    ${(S.breaks || []).map((b, i) => `<div class="row" style="margin-bottom:6px">De ${inp(`schedule.breaks.${i}.from`, 'data-rr', 'time')} à ${inp(`schedule.breaks.${i}.to`, 'data-rr', 'time')}<button class="icon sm danger" data-act="breakDel" data-i="${i}">✕</button></div>`).join('')}
     <button class="sm" data-act="breakAdd">+ Ajouter une pause</button></div>
     <div class="card"><h3>Terrains</h3>
     <div class="row" style="margin-bottom:10px"><span class="muted small">Nombre de terrains</span><input type="number" min="1" max="40" value="${S.courts.length}" data-ch="courtCount"></div>
     ${S.courts.map((c, i) => `<div style="margin-bottom:6px">${inp(`schedule.courts.${i}`)}</div>`).join('')}
     ${field('Affectation des terrains', sel('schedule.courtMode', [['free', 'Libre : premier terrain disponible'], ['pool', 'Une poule par terrain (si possible)']]))}</div>
     <div class="card"><h3>Options</h3>
-    <label class="check">${inp('schedule.rest', '', 'checkbox')} Éviter qu'une équipe joue deux créneaux d'affilée</label>
+    <label class="check">${inp('schedule.rest', 'data-rr', 'checkbox')} Éviter qu'une équipe joue deux créneaux d'affilée</label>
+    <p class="muted small" style="margin-top:-4px">Le planning équilibre toujours les temps de pause : priorité aux équipes qui attendent depuis le plus longtemps.</p>
+    <label class="check">${inp('schedule.finalAlone', 'data-rr', 'checkbox')} Finale seule sur le dernier créneau</label>
+    <label class="check">${inp('schedule.freeEntry', '', 'checkbox')} Saisie libre : ne pas demander de confirmation pour un match pas encore commencé (reprise d'un tournoi)</label>
     <label class="check">${inp('schedule.referee', '', 'checkbox')} Arbitrage par les équipes au repos</label>
     <p class="muted small">L'arbitre est choisi parmi les équipes libres sur le créneau (de préférence de la même poule), en équilibrant le nombre d'arbitrages. En phase finale, il est désigné dès que les équipes du match sont connues.</p>
     ${field('Écran public : durée d\'affichage de chaque page (s)', inp('display.rotate', 'min="5"', 'number'))}</div></div>
+    <div class="card est-card"><h3>Estimation du tournoi</h3>${estimateHTML(t, true)}</div>
     <div class="note">Ces réglages s'appliquent aux phases générées ensuite. Pour un tournoi déjà lancé, utilisez « Replanifier » dans l'onglet Planning.</div>`;
 }
 
@@ -1096,8 +1342,8 @@ function viewMatches(t) {
       ${list || '<p class="muted">Aucun match ne correspond.</p>'}` : ''}`;
 }
 function matchRow(t, m) {
-  return `<div class="mrow ${m.done ? 'done' : ''}" data-act="openMatch" data-id="${m.id}">
-    <div class="mmeta"><b>M${m.num}</b> · ${esc(t.schedule.courts[m.court] ?? '—')}</div>
+  return `<div class="mrow ${m.done ? 'done' : ''} ${m.live && !m.done ? 'live' : ''}" data-act="openMatch" data-id="${m.id}">
+    <div class="mmeta"><b>M${m.num}</b> · ${esc(t.schedule.courts[m.court] ?? '—')}${m.live && !m.done ? ' <span class="badge live">● En cours</span>' : ''}</div>
     <div class="mlabel">${esc(matchLabel(t, m))}</div>
     <div class="mteams"><div class="ta ${winSide(m, 'a') ? 'win' : ''}">${srcTag(m.a)}</div><div class="msc">${scoreHTML(t, m)}</div><div class="tb ${winSide(m, 'b') ? 'win' : ''}">${srcTag(m.b)}</div></div>
     <div class="mref">${m.referee ? 'Arbitre : ' + esc(tname(m.referee)) : ''}</div></div>`;
@@ -1107,7 +1353,7 @@ function matchRow(t, m) {
 function openMatch(id) {
   const t = T(), m = mById(id); if (!m) return;
   ui.mm = id;
-  const ta = teamOf(m.a), tb = teamOf(m.b), ready = ta && tb, sc = t.scoring;
+  const ta = teamOf(m.a), tb = teamOf(m.b), ready = ta && tb, sc = scoringOf(t, m);
   let entry = '';
   if (!ready) entry = '<div class="note">Les équipes de ce match ne sont pas encore connues.</div>';
   else if (sc.mode === 'score') {
@@ -1122,7 +1368,8 @@ function openMatch(id) {
     <label class="check"><input type="radio" name="tbw" value="b" data-inp="mm" ${m.done && m.winner === 'b' ? 'checked' : ''}>${esc(tname(tb))}</label>
     ${sc.mode === 'score' ? `<div class="row small">Tirs au but (optionnel) <input type="number" id="tba" min="0" style="width:64px" value="${m.tab ? m.tab[0] : ''}"> – <input type="number" id="tbb" min="0" style="width:64px" value="${m.tab ? m.tab[1] : ''}"></div>` : ''}</div>` : '';
   const teamsOpts = t.teams.map(x => `<option value="${x.id}" ${m.referee === x.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('');
-  showModal(`<h3>M${m.num} · ${esc(matchLabel(t, m))}</h3>
+  showModal(`<div class="row"><h3 class="grow" style="margin:0">M${m.num} · ${esc(matchLabel(t, m))}</h3>${m.live && !m.done ? '<span class="badge live">● En cours</span>' : ''}</div>
+    <div class="muted small" style="margin-top:4px">${fmtTime(m.time)} · ${esc(t.schedule.courts[m.court] ?? '')}${sc.mode === 'sets' ? ' · ' + esc(setsFormatLabel(sc.sets)) : ` · ${matchDur(t, m)} min`}</div>
     <div class="mm-teams"><div>${srcTag(m.a)}</div><span class="muted">contre</span><div>${srcTag(m.b)}</div></div>
     ${entry}${tbox}<div class="mm-sum" id="mmsum"></div><div id="mmerr"></div>
     <details style="margin-top:10px"><summary class="small">Horaire, terrain, arbitre</summary><div class="fields" style="margin-top:8px">
@@ -1130,13 +1377,13 @@ function openMatch(id) {
       ${field('Terrain', `<select id="mcourt">${t.schedule.courts.map((c, i) => `<option value="${i}" ${m.court === i ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select>`)}
       ${field('Arbitre', `<select id="mref"><option value="">—</option>${teamsOpts}</select>`)}</div></details>
     <div class="actions">${ready ? `<button class="danger" data-act="mmForfeit" data-side="a">Forfait ${esc(tname(ta))}</button><button class="danger" data-act="mmForfeit" data-side="b">Forfait ${esc(tname(tb))}</button>` : ''}
-      ${m.done ? '<button data-act="mmClear">Effacer le résultat</button>' : ''}<span class="spacer"></span>
+      ${m.done ? '<button data-act="mmClear">Effacer le résultat</button>' : ready ? `<button data-act="mmLive">${m.live ? '■ Plus en cours' : '▶ Match en cours'}</button>` : ''}<span class="spacer"></span>
       <button data-act="modalClose">Annuler</button><button class="primary" data-act="mmSave">Enregistrer</button></div>`);
   mmUpdate();
 }
 const vnum = id => { const el = document.getElementById(id); return el ? num(el.value) : null; };
-function setWarn(t, i, a, b) {
-  const s = t.scoring.sets, target = s.type === 'bestof' && i === s.count - 1 ? Number(s.lastPoints) || Number(s.points) : Number(s.points);
+function setWarn(s, i, a, b) {
+  const target = s.type === 'bestof' && i === s.count - 1 ? Number(s.lastPoints) || Number(s.points) : Number(s.points);
   const hi = Math.max(a, b), lo = Math.min(a, b), cap = Number(s.cap) || 0;
   if (cap && hi > cap) return `set ${i + 1} : au-delà du plafond (${cap})`;
   if (hi < target) return `set ${i + 1} : aucune équipe n'atteint ${target}`;
@@ -1146,7 +1393,7 @@ function setWarn(t, i, a, b) {
   return null;
 }
 function readResult(t, m) {
-  const sc = t.scoring, ko = isKO(m), noDraw = ko || !sc.allowDraw;
+  const sc = scoringOf(t, m), ko = isKO(m), noDraw = ko || !sc.allowDraw;
   const pickTb = () => { const r = document.querySelector('input[name=tbw]:checked'); return r ? r.value : null; };
   if (sc.mode === 'score') {
     const a = vnum('sa'), b = vnum('sb');
@@ -1166,7 +1413,7 @@ function readResult(t, m) {
     if (a === null && b === null) continue;
     if (a === null || b === null) return { error: `Set ${i + 1} incomplet.`, partial: true };
     if (a === b) return { error: `Set ${i + 1} : un set ne peut pas finir à égalité.` };
-    sets.push([a, b]); const wn = setWarn(t, i, a, b); if (wn) warns.push(wn);
+    sets.push([a, b]); const wn = setWarn(sc.sets, i, a, b); if (wn) warns.push(wn);
   }
   if (!sets.length) return { error: 'Saisissez au moins un set.', partial: true };
   const wa = sets.filter(s => s[0] > s[1]).length, wb = sets.length - wa;
@@ -1197,9 +1444,16 @@ function mmUpdate() {
   sum.innerHTML = (w === 'draw' ? 'Match nul' : `Vainqueur : ${esc(tname(teamOf(m[w])))}`) + (r.warns.length ? `<div class="small" style="color:var(--warn);font-weight:400">⚠ ${esc(r.warns.join(' · '))}</div>` : '');
 }
 function applyDetails(m) {
-  const tm = parseTime(document.getElementById('mtime')?.value); if (tm != null) m.time = tm;
+  const tm = parseTime(document.getElementById('mtime')?.value); if (tm != null && fmtTime(tm) !== fmtTime(m.time)) m.time = tm;
   const c = document.getElementById('mcourt'); if (c) m.court = Number(c.value);
   const r = document.getElementById('mref'); if (r) m.referee = r.value || null;
+}
+/* saisie anticipée : le jour du tournoi, un match pas encore commencé et prévu plus tard demande confirmation */
+async function confirmEarly(t, m) {
+  if (t.schedule.freeEntry || m.live || m.time == null || t.date !== todayISO() || m.time <= nowMin() + 5) return true;
+  const ok = await askConfirm(`Ce match est prévu à <b>${fmtTime(m.time)}</b> et n'est pas marqué « en cours ». Confirmer la saisie du résultat ?`, 'Confirmer la saisie', false, 'Ne plus demander pour ce tournoi (saisie libre, reprise de tournoi)');
+  if (ok && confirmChecked) { t.schedule.freeEntry = true; save(); }
+  return ok;
 }
 async function commitResult(m, apply) {
   const t = T(), oldW = m.done ? teamOf({ w: m.id }) : null, oldL = m.done ? teamOf({ l: m.id }) : null;
@@ -1225,10 +1479,10 @@ async function commitResult(m, apply) {
 /* ---------- classements ---------- */
 function standingsTable(t, rows, opts = {}) {
   const sets = t.scoring.mode === 'sets', draws = t.scoring.allowDraw, u = t.scoring.unit;
-  return `<table><tr><th>Rg</th><th class="l">Équipe</th><th>Pts</th><th>J</th><th>G</th>${draws ? '<th>N</th>' : ''}<th>P</th>${sets ? '<th title="Sets gagnés / perdus">Sets</th><th title="Quotient de sets">Q.s</th>' : ''}<th title="${esc(u)} marqués / encaissés">${esc(capz(u))}</th><th>Diff</th>${opts.dest ? '<th class="l">Suite</th>' : ''}</tr>
+  return `<table><tr><th>Rg</th><th class="l">Équipe</th><th>Pts</th><th>J</th><th>G</th>${draws ? '<th>N</th>' : ''}<th>P</th>${sets ? '<th class="hide-sm" title="Sets gagnés / perdus">Sets</th><th class="hide-sm" title="Quotient de sets">Q.s</th>' : ''}<th class="hide-sm" title="${esc(u)} marqués / encaissés">${esc(capz(u))}</th><th>Diff</th>${opts.dest ? '<th class="l">Suite</th>' : ''}</tr>
     ${rows.map(r => `<tr><td class="rk">${opts.rankKey ? r[opts.rankKey] : r.rank}</td><td class="l">${teamTag(r.id)}${opts.pool && r.pool != null ? ` <span class="muted small">(${esc(opts.pool[r.pool])})</span>` : ''}</td>
       <td class="pts">${r.pts}</td><td>${r.j}</td><td>${r.w}</td>${draws ? `<td>${r.d}</td>` : ''}<td>${r.l}${r.ff ? `<span class="muted small"> (${r.ff}F)</span>` : ''}</td>
-      ${sets ? `<td>${r.sw}-${r.sl}</td><td>${fmtRatio(r.sw, r.sl)}</td>` : ''}<td>${r.sc}-${r.co}</td><td>${r.sc - r.co > 0 ? '+' : ''}${r.sc - r.co}</td>${opts.dest ? `<td class="l small">${esc(opts.dest(r) || '')}</td>` : ''}</tr>`).join('')}</table>`;
+      ${sets ? `<td class="hide-sm">${r.sw}-${r.sl}</td><td class="hide-sm">${fmtRatio(r.sw, r.sl)}</td>` : ''}<td class="hide-sm">${r.sc}-${r.co}</td><td>${r.sc - r.co > 0 ? '+' : ''}${r.sc - r.co}</td>${opts.dest ? `<td class="l small">${esc(opts.dest(r) || '')}</td>` : ''}</tr>`).join('')}</table>`;
 }
 function destOf(t, i, grank) {
   const nx = t.phases[i + 1]; if (!nx) return '';
@@ -1283,7 +1537,7 @@ function viewBrackets(t) {
 function viewPlanning(t) {
   if (!t.matches.length) return '<div class="card">Le planning apparaîtra une fois une phase générée.</div>';
   const S = t.schedule, times = [...new Set(t.matches.filter(m => m.time != null).map(m => m.time))].sort((a, b) => a - b);
-  const grid = `<div class="card plan"><table><tr><th class="l">Heure</th>${S.courts.map(c => `<th class="l">${esc(c)}</th>`).join('')}</tr>
+  const grid = `<div class="card plan plan-grid"><table><tr><th class="l">Heure</th>${S.courts.map(c => `<th class="l">${esc(c)}</th>`).join('')}</tr>
     ${times.map(tm => `<tr><td class="t">${fmtTime(tm)}</td>${S.courts.map((_, ci) => `<td>${t.matches.filter(m => m.time === tm && m.court === ci).map(m => `<div class="pm ${m.done ? 'done' : ''}" data-act="openMatch" data-id="${m.id}"><div class="muted">M${m.num} · ${esc(matchLabel(t, m))}</div>
       <div>${srcTag(m.a)} <span class="muted">–</span> ${srcTag(m.b)}</div>${m.done ? `<div class="small"><b>${scoreHTML(t, m).replace(/<small>.*<\/small>/, '')}</b></div>` : ''}${m.referee ? `<div class="muted">Arb. ${esc(tname(m.referee))}</div>` : ''}</div>`).join('')}</td>`).join('')}</tr>`).join('')}</table></div>`;
   const tid = ui.planTeam;
@@ -1294,8 +1548,9 @@ function viewPlanning(t) {
       <td class="l">M${m.num} · ${srcTag(m.a)} – ${srcTag(m.b)}</td><td>${scoreHTML(t, m).replace(/<small>.*<\/small>/, '')}</td></tr>`).join('') || '<tr><td colspan="5">Aucun match programmé.</td></tr>'}</table>
       <p class="muted small">Les matchs de phase finale apparaissent ici dès que l'équipe y est qualifiée.</p>`;
   }
-  return `<div class="row no-print" style="margin-bottom:12px"><button data-act="replan">Replanifier les matchs non joués…</button><button data-act="shift">Décaler les horaires…</button><span class="spacer"></span><button data-act="print">Imprimer</button></div>
+  return `<div class="row no-print" style="margin-bottom:12px"><button data-act="replan">Replanifier les matchs non joués…</button><button data-act="shift">Décaler les horaires…</button><span class="spacer"></span><button data-act="pdfCourts">📄 Feuilles de terrain (PDF)</button><button data-act="print" class="hide-sm">Imprimer</button></div>
     ${grid}
+    <div class="plan-list">${times.map(tm => `<div class="slot-h">${fmtTime(tm)}</div>${t.matches.filter(m => m.time === tm).sort((a, b) => a.court - b.court).map(m => matchRow(t, m)).join("")}`).join("")}</div>
     <div class="card"><div class="row" style="margin-bottom:10px"><h3 style="margin:0" class="grow">Planning par équipe</h3>
     <select data-ch="planTeam"><option value="">Choisir une équipe…</option>${t.teams.map(x => `<option value="${x.id}" ${tid === x.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select></div>${teamPlan}</div>`;
 }
@@ -1307,6 +1562,98 @@ function viewFinal(t) {
   const medal = r => r === 1 ? '🥇' : r === 2 ? '🥈' : r === 3 ? '🥉' : '';
   return `<div class="card"><div class="row" style="margin-bottom:12px"><h2 class="grow" style="margin:0">${fr.complete ? 'Classement final' : `Classement provisoire <span class="muted small">(à l'issue de : ${esc(fr.ph.name)}${phaseComplete(t, fr.ph) ? '' : ', en cours'})</span>`}</h2><button class="no-print" data-act="print">Imprimer</button></div>
     <table><tr><th>Rang</th><th class="l">Équipe</th></tr>${fr.rows.map(r => `<tr><td class="rk">${r.rank == null ? '<span class="muted">…</span>' : `${medal(r.rank)} ${ord(r.rank)}`}</td><td class="l" style="font-size:16px">${teamTag(r.id)}${r.pending ? ' <span class="muted small">(en lice)</span>' : ''}</td></tr>`).join('')}</table></div>`;
+}
+
+/* ---------- export PDF : une page A4 par phase ---------- */
+function pdfModal() {
+  const t = T(), phs = t.phases.map((p, i) => [p, i]).filter(([p]) => p.status !== 'draft');
+  if (!phs.length) return toast('Aucune phase générée pour l\'instant.');
+  showModal(`<h3>Export PDF des résultats</h3><p class="small muted">Une page A4 par élément, réduite si besoin pour tenir sur une page. Dans la fenêtre d'impression, choisissez « Enregistrer au format PDF ».</p>
+    ${phs.map(([p, i]) => `<label class="check"><input type="checkbox" data-pdf="${i}" checked>${esc(p.name)} ${phaseComplete(t, p) ? '' : '<span class="badge act" style="margin-left:6px">en cours</span>'}</label>`).join('')}
+    <label class="check"><input type="checkbox" data-pdf="final" checked>${finalRanking(t).complete ? 'Classement final' : 'Classement provisoire'}</label>
+    <label class="check"><input type="checkbox" data-pdf="plan">Planning des matchs</label>
+    <label class="check"><input type="checkbox" data-pdf="courts">Feuilles de terrain — ${esc(currentPhase(t).name)} (une page par terrain, scores à remplir à la main)</label>
+    <div class="actions"><button data-act="modalClose">Annuler</button><button class="primary" data-act="pdfGo">Créer le PDF</button></div>`);
+}
+function pdfHead(t, title, sub) {
+  return `<div class="pp-head"><div><div class="pp-t">${esc(t.name)}</div><div class="pp-s">${esc([fmtDate(t.date), t.place, (SPORTS[t.sport] || SPORTS.other).name].filter(Boolean).join(' · '))}</div></div>
+    <div style="text-align:right"><div class="pp-ph">${esc(title)}</div><div class="pp-s">${sub ? esc(sub) + ' · ' : ''}édité le ${new Date().toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })}</div></div></div>`;
+}
+function pdfResults(t, ms) {
+  const sets = t.scoring.mode === 'sets';
+  return `<table class="pp-res">${ms.map(m => {
+    const d = m.done ? sideData(t, m) : null, sv = s => !d ? '' : m.forfeit ? (m.forfeit === s ? 'F' : '') : sets ? d[s].sw : d[s].sc;
+    return `<tr><td class="l">M${m.num}</td><td class="l ${winSide(m, 'a') ? 'b' : ''}">${esc(tname(teamOf(m.a)) === '?' ? '…' : tname(teamOf(m.a)))}</td><td>${m.done ? `${sv('a')} – ${sv('b')}` : fmtTime(m.time)}</td>
+      <td class="l ${winSide(m, 'b') ? 'b' : ''}">${esc(tname(teamOf(m.b)) === '?' ? '…' : tname(teamOf(m.b)))}</td><td class="l sm">${m.done && sets && !m.forfeit ? m.sets.map(s => s.join('-')).join(' ') : m.tab ? 't.a.b. ' + m.tab.join('-') : ''}</td></tr>`; }).join('')}</table>`;
+}
+function pdfPhase(t, ph, i) {
+  const done = phaseComplete(t, ph), sub = done ? 'phase terminée' : 'en cours — résultats provisoires';
+  let body = '';
+  if (ph.type === 'pools') {
+    body = `<div class="pp-grid">${ph.pools.map((p, pi) => `<div class="pp-box"><h4>${esc(p.name)}</h4>${standingsTable(t, poolStandings(t, ph, pi))}
+      ${pdfResults(t, phaseMatches(t, ph).filter(m => m.pool === pi).sort((a, b) => a.num - b.num))}</div>`).join('')}</div>`;
+    if (ph.pools.length > 1) body += `<div class="pp-box"><h4>Classement général de la phase</h4>${rankingList(t, phaseRanking(t, ph).map(r => Object.assign({}, r, { rank: r.grank })))}</div>`;
+  } else {
+    body = ph.tableaux.map((tb, ti) => {
+      const ms = phaseMatches(t, ph).filter(m => m.tableau === ti).sort((a, b) => a.round - b.round || a.ps - b.ps || a.num - b.num);
+      if (!ms.length) return '';
+      const sc = scoringFor(t, ph, ti);
+      return `<div class="pp-box"><h4>${esc(tb.name)} <span class="sm">(rangs ${ph.ranges[ti][0]} à ${ph.ranges[ti][1]}${sc.mode === 'sets' ? ' · ' + esc(setsFormatLabel(sc.sets)) : ''})</span></h4>
+        ${[...new Set(ms.map(m => m.round))].map(r => `<div class="pp-round">Tour ${r}</div>${pdfResults(t, ms.filter(m => m.round === r))}`).join('')}
+        <div class="sm" style="margin-top:4px">${ms.map(m => `M${m.num} : ${esc(m.label)}`).join(' · ')}</div></div>`;
+    }).join('') + `<div class="pp-box"><h4>Classement issu de la phase</h4>${rankingList(t, phaseRanking(t, ph))}</div>`;
+  }
+  return `<section class="pp">${pdfHead(t, ph.name, sub)}${body}</section>`;
+}
+function pdfFinal(t) {
+  const fr = finalRanking(t);
+  return `<section class="pp">${pdfHead(t, fr.complete ? 'Classement final' : 'Classement provisoire', fr.complete ? '' : `à l'issue de : ${fr.ph.name}`)}
+    <div class="pp-box pp-final">${rankingList(t, fr.rows)}</div></section>`;
+}
+function pdfPlan(t) {
+  const ms = t.matches.filter(m => m.time != null).sort((a, b) => a.time - b.time || a.court - b.court);
+  return `<section class="pp">${pdfHead(t, 'Planning des matchs', '')}<table class="pp-res"><tr><th class="l">Heure</th><th class="l">Terrain</th><th class="l">Match</th><th class="l">Équipes</th><th>Score</th><th class="l">Arbitre</th></tr>
+    ${ms.map(m => `<tr><td class="l">${fmtTime(m.time)}</td><td class="l">${esc(t.schedule.courts[m.court] ?? '')}</td><td class="l sm">M${m.num} · ${esc(matchLabel(t, m))}</td><td class="l">${srcTag(m.a)} – ${srcTag(m.b)}</td><td>${scoreHTML(t, m).replace(/<small>.*<\/small>/, '')}</td><td class="l sm">${m.referee ? esc(tname(m.referee)) : ''}</td></tr>`).join('')}</table></section>`;
+}
+/* feuilles de terrain : phase en cours, une page par terrain, cases pour noter les scores à la main */
+function currentPhase(t) {
+  const gen = t.phases.filter(p => p.status !== 'draft');
+  return gen.find(p => !phaseComplete(t, p)) || gen[gen.length - 1] || null;
+}
+function pdfCourts(t) {
+  const ph = currentPhase(t); if (!ph) return '';
+  const ms = phaseMatches(t, ph).filter(m => m.time != null);
+  const box = (v, small) => `<span class="bx ${small ? 's' : ''}">${v ?? ''}</span>`;
+  const side = src => { const id = teamOf(src); return id ? `<b>${esc(tname(id))}</b>` : `<span class="ph">${src && src.l ? 'Perdant' : 'Vainqueur'} M${(mById(src.w || src.l) || {}).num ?? '?'}</span><div class="wl"></div>`; };
+  return t.schedule.courts.map((c, ci) => {
+    const list = ms.filter(m => m.court === ci).sort((a, b) => a.time - b.time);
+    if (!list.length) return '';
+    const rows = list.map(m => {
+      const sc = scoringOf(t, m);
+      let mid;
+      if (sc.mode === 'sets') {
+        const n = Math.max(1, Number(sc.sets.count) || 1);
+        mid = `<div class="sets-bx">${Array.from({ length: n }, (_, i) => { const s = m.done && !m.forfeit && m.sets ? m.sets[i] : null; return `<div><span class="sm">S${i + 1}</span>${box(s && s[0], 1)}<span>-</span>${box(s && s[1], 1)}</div>`; }).join('')}</div>`;
+      } else mid = `${box(m.done && !m.forfeit ? m.score[0] : '')}<span class="dash">–</span>${box(m.done && !m.forfeit ? m.score[1] : '')}`;
+      return `<tr><td class="l"><b>${fmtTime(m.time)}</b><div class="sm">M${m.num}</div></td><td class="l sm lab">${esc(matchLabel(t, m, false))}</td>
+        <td class="r tm-a">${side(m.a)}</td><td class="mid">${mid}</td><td class="l tm-b">${side(m.b)}</td>
+        <td class="l sm ref">${t.schedule.referee || m.referee ? `Arbitre<br>${m.referee ? `<b>${esc(tname(m.referee))}</b>` : '<div class="wl"></div>'}` : ''}</td></tr>`;
+    }).join('');
+    const sc = scoringFor(t, ph, null);
+    return `<section class="pp pp-court">${pdfHead(t, c, `${ph.name}${sc.mode === 'sets' ? ' · ' + setsFormatLabel(sc.sets) : ''}`)}
+      <table>${rows}</table><div class="sm" style="margin-top:8px">Forfait : écrire « F » dans la case de l'équipe forfait. Rapporter la feuille à la table de marque après chaque match.</div></section>`;
+  }).join('');
+}
+function printPages(html) {
+  const box = document.getElementById('print');
+  box.innerHTML = html + '<div class="pp-probe"></div>'; box.classList.add('measure');
+  // réduit chaque page pour qu'elle tienne sur une feuille A4 (186 × 273 mm imprimables)
+  const pageH = box.querySelector('.pp-probe').offsetHeight;
+  box.querySelectorAll('.pp').forEach(p => { p.style.zoom = ''; const h = p.scrollHeight; if (h > pageH) p.style.zoom = (pageH / h * 0.98).toFixed(3); });
+  box.classList.remove('measure'); document.body.classList.add('printing');
+  const done = () => { document.body.classList.remove('printing'); box.innerHTML = ''; window.removeEventListener('afterprint', done); };
+  window.addEventListener('afterprint', done);
+  setTimeout(() => window.print(), 50);
 }
 
 /* ---------- modales diverses ---------- */
@@ -1329,21 +1676,40 @@ function compoModal(i) {
     <div class="actions"><button data-act="modalClose">Annuler</button><button class="primary" data-act="compoSave" data-i="${i}">Valider</button></div>`);
 }
 
+function ntBuild(name) {
+  const v = id => document.getElementById(id).value, n = Math.max(2, Math.min(128, Number(v('ntN')) || 8));
+  const t = newTournament(name);
+  applySport(t, v('ntSport')); setTeamCount(t, n);
+  t.phases = TEMPLATES.find(x => x.k === v('ntTpl')).f(n);
+  const S = t.schedule, c = Math.max(1, Math.min(40, Number(v('ntC')) || 1));
+  S.courts = Array.from({ length: c }, (_, i) => `Terrain ${i + 1}`);
+  S.duration = Math.max(1, Number(v('ntD')) || 15); S.changeover = Math.max(0, Number(v('ntB')) || 0);
+  if (parseTime(v('ntS')) != null) S.start = v('ntS');
+  return t;
+}
+function ntEstimate() {
+  const box = document.getElementById('ntEst'); if (!box) return;
+  box.innerHTML = estimateHTML(ntBuild('estimation'), true);
+}
+
 /* ---------- actions ---------- */
 const A = {
   home() { ui.view = 'home'; render(); },
   openT(el, e) { if (e.target.closest('button')) return; db.currentId = el.dataset.id; ui.view = 't'; ui.tab = 'config'; ui.cfg = 'general'; ui.mf = { phase: 'all', court: 'all', status: 'all', q: '' }; persist(); invalidate(); render(); },
   newT() {
+    const ni = (id, v, attrs = '') => `<input id="${id}" type="number" data-inp="nt" value="${v}" ${attrs}>`;
     showModal(`<h3>Nouveau tournoi</h3>${field('Nom', '<input id="ntName" autofocus placeholder="Tournoi de printemps">')}
-      ${field('Sport', `<select id="ntSport">${Object.entries(SPORTS).map(([k, s]) => `<option value="${k}">${esc(s.name)}</option>`).join('')}</select>`)}
-      ${field('Nombre d\'équipes', '<input id="ntN" type="number" min="2" max="128" value="8">')}
+      <div class="fields">${field('Sport', `<select id="ntSport" data-ch="nt">${Object.entries(SPORTS).map(([k, s]) => `<option value="${k}">${esc(s.name)}</option>`).join('')}</select>`)}
+      ${field('Nombre d\'équipes', ni('ntN', 8, 'min="2" max="128"'))}</div>
+      ${field('Déroulement', `<select id="ntTpl" data-ch="nt">${TEMPLATES.map((x, i) => `<option value="${x.k}" ${i === 1 ? 'selected' : ''}>${esc(x.l)}</option>`).join('')}</select>`)}
+      <div class="fields">${field('Terrains', ni('ntC', 2, 'min="1" max="40"'))}${field('Durée d\'un match (min)', ni('ntD', 15, 'min="1"'))}${field('Battement (min)', ni('ntB', 5, 'min="0"'))}
+      ${field('Début', '<input id="ntS" type="time" value="09:00" data-inp="nt">')}</div>
+      <div class="card est-card" style="box-shadow:none;margin:4px 0 0"><div class="muted small" style="margin-bottom:6px">Estimation du temps total (tout reste modifiable ensuite)</div><div id="ntEst"></div></div>
       <div class="actions"><button data-act="modalClose">Annuler</button><button class="primary" data-act="newTGo">Créer</button></div>`);
+    ntEstimate();
   },
   newTGo() {
-    const t = newTournament(document.getElementById('ntName').value.trim());
-    applySport(t, document.getElementById('ntSport').value);
-    const n = Math.max(2, Math.min(128, Number(document.getElementById('ntN').value) || 8));
-    setTeamCount(t, n); t.phases = TEMPLATES[1].f(n);
+    const t = ntBuild(document.getElementById('ntName').value.trim());
     db.tournaments[t.id] = t; db.currentId = t.id; ui.view = 't'; ui.tab = 'config'; ui.cfg = 'general';
     closeModal(); save(); render();
   },
@@ -1366,6 +1732,14 @@ const A = {
   cfg(el) { ui.cfg = el.dataset.k; render(); },
   display() { window.open(location.pathname + location.search + '#ecran', 'tournoi-ecran', 'width=1280,height=720'); },
   backups() { backupsModal(); },
+  pdf() { pdfModal(); },
+  pdfGo() {
+    const t = T(), keys = [...document.querySelectorAll('[data-pdf]:checked')].map(x => x.dataset.pdf);
+    if (!keys.length) return toast('Cochez au moins un élément.');
+    const html = keys.map(k => k === 'final' ? pdfFinal(t) : k === 'plan' ? pdfPlan(t) : k === 'courts' ? pdfCourts(t) : pdfPhase(t, t.phases[Number(k)], Number(k))).join('');
+    closeModal(); printPages(html);
+  },
+  pdfCourts() { const t = T(); if (!currentPhase(t)) return toast('Aucune phase générée.'); printPages(pdfCourts(t)); },
   linkFile() { linkFile(); },
   async restore(el) {
     const b = getBackups().find(x => String(x.ts) === el.dataset.ts); if (!b) return;
@@ -1438,17 +1812,24 @@ const A = {
     closeModal(); save(); render(); toast('Poules modifiées, matchs régénérés.');
   },
   openMatch(el) { openMatch(el.dataset.id); },
-  mmSave() {
+  async mmSave() {
     const t = T(), m = mById(ui.mm);
     if (!teamOf(m.a) || !teamOf(m.b)) { applyDetails(m); save(); closeModal(); render(); return; }
     const r = readResult(t, m);
     if (r.error) { document.getElementById('mmerr').innerHTML = `<div class="note err">${esc(r.error)}</div>`; mmUpdate(); return; }
-    commitResult(m, x => { applyDetails(x); Object.assign(x, { score: null, sets: null, forfeit: null, tab: null }, r.data, { done: true, doneAt: Date.now() }); });
+    if (!m.done && !await confirmEarly(t, m)) return;
+    commitResult(m, x => { applyDetails(x); Object.assign(x, { score: null, sets: null, forfeit: null, tab: null }, r.data, { done: true, live: false, doneAt: Date.now() }); });
+  },
+  mmLive() {
+    const m = mById(ui.mm), t = T();
+    applyDetails(m); m.live = !m.live;
+    if (m.live) t.matches.forEach(x => { if (x !== m && x.live && x.court === m.court) x.live = false; });
+    save(); closeModal(); render(); toast(m.live ? `M${m.num} est en cours.` : `M${m.num} n'est plus en cours.`);
   },
   async mmForfeit(el) {
     const m = mById(ui.mm), side = el.dataset.side;
     if (!await askConfirm(`Déclarer <b>${esc(tname(teamOf(m[side])))}</b> forfait pour ce match ?`, 'Déclarer forfait')) return;
-    commitResult(m, x => { applyDetails(x); Object.assign(x, { score: null, sets: null, tab: null, forfeit: side, winner: side === 'a' ? 'b' : 'a', done: true, doneAt: Date.now() }); });
+    commitResult(m, x => { applyDetails(x); Object.assign(x, { score: null, sets: null, tab: null, live: false, forfeit: side, winner: side === 'a' ? 'b' : 'a', done: true, doneAt: Date.now() }); });
   },
   async mmClear() {
     const m = mById(ui.mm);
@@ -1480,6 +1861,7 @@ const CH = {
     while (S.courts.length < n) S.courts.push(`Terrain ${S.courts.length + 1}`);
     S.courts.length = n; save(); setTimeout(render);
   },
+  nt() { ntEstimate(); },
   mf(el) { ui.mf[el.dataset.k] = el.value; render(); },
   planTeam(el) { ui.planTeam = el.value; render(); },
 };
@@ -1503,6 +1885,7 @@ document.addEventListener('change', e => {
 document.addEventListener('input', e => {
   const k = e.target.dataset.inp;
   if (k === 'mm') mmUpdate();
+  else if (k === 'nt') ntEstimate();
   else if (k === 'mfq') { ui.mf.q = e.target.value; render(); }
 });
 document.addEventListener('keydown', e => {
@@ -1546,8 +1929,10 @@ function displayPanels(t) {
     const cards = S.courts.map((c, ci) => {
       const ms = todo.filter(m => m.court === ci).sort((a, b) => a.time - b.time);
       if (!ms.length) return `<div class="d-court"><h3>${esc(c)}</h3><div class="d-meta">Plus de match prévu</div></div>`;
+      const live = ms.find(x => x.live);
+      if (live) ms.splice(ms.indexOf(live), 1), ms.unshift(live);
       const m = ms[0];
-      return `<div class="d-court"><h3><span>${esc(c)}</span><span>${fmtTime(m.time)}</span></h3>
+      return `<div class="d-court ${m.live ? 'live' : ''}"><h3><span>${esc(c)}</span><span>${m.live ? '<span class="d-live">● EN COURS</span>' : fmtTime(m.time)}</span></h3>
         <div class="d-match"><div>${srcTag(m.a)}</div><span class="vs">contre</span><div>${srcTag(m.b)}</div></div>
         <div class="d-meta">M${m.num} · ${esc(matchLabel(t, m))}${m.referee ? ' · Arbitre : ' + esc(tname(m.referee)) : ''}</div>
         ${ms.slice(1, 3).map(n => `<div class="d-next">${fmtTime(n.time)} · ${srcTag(n.a)} – ${srcTag(n.b)}${n.referee ? ` <span style="color:#8fa0bb">(arb. ${esc(tname(n.referee))})</span>` : ''}</div>`).join('')}</div>`;
