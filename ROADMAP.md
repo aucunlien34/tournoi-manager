@@ -22,6 +22,7 @@ Application en ligne : https://aucunlien34.github.io/tournoi-manager/
 8. **Application installable** (Android, iPhone, ordinateur) avec logo, fonctionnement hors ligne.
 9. **Type de score « Au temps »**, durée de match réglée dans Format & points, complétion automatique des scores de set, onglet Classement général séparé.
 10. **Parcours en 3 sections** : Préparation (6 étapes numérotées avec Précédent / Suivant et un récapitulatif de lancement) → Matchs (barre des phases, liste, planning) → Résultats (classements, général, tableaux, final), avec un bandeau « À faire » qui indique toujours la prochaine action.
+11. **Souplesse avant chaque phase** : « Générer » ouvre une fenêtre qui montre qui entre (classement précédent), où (tableau, niveau) et la structure de la phase encore modifiable. Menus déroulants avec « Autre… » (sets, points, durée, nombre de poules, points au classement), estimation de durée sur chaque modèle de structure, forfait compté au score maximal des sets, pas de zoom automatique sur téléphone.
 
 ## Pistes
 - Saisie des scores par les arbitres sur téléphone (nécessiterait un serveur).
