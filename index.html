@@ -361,22 +361,22 @@ const KEY = 'tournoi-manager:v1', BKEY = 'tournoi-manager:backups';
 const DISPLAY = location.hash.startsWith('#ecran');
 const COLORS = ['#e6194b','#3cb44b','#4363d8','#f58231','#911eb4','#42d4f4','#f032e6','#9acd32','#fa8072','#469990','#b088f9','#9a6324','#800000','#2e8b57','#808000','#000075','#708090','#ff8c00','#1e90ff','#c71585'];
 const SPORTS = {
-  football:{name:'Football',mode:'score',unit:'buts',draw:true},
-  futsal:{name:'Futsal',mode:'score',unit:'buts',draw:true},
-  handball:{name:'Handball',mode:'score',unit:'buts',draw:true},
-  basketball:{name:'Basket-ball',mode:'score',unit:'points',draw:false},
-  basket3x3:{name:'Basket 3x3',mode:'score',unit:'points',draw:false},
+  football:{name:'Football',mode:'time',unit:'buts',draw:true},
+  futsal:{name:'Futsal',mode:'time',unit:'buts',draw:true},
+  handball:{name:'Handball',mode:'time',unit:'buts',draw:true},
+  basketball:{name:'Basket-ball',mode:'time',unit:'points',draw:false},
+  basket3x3:{name:'Basket 3x3',mode:'time',unit:'points',draw:false},
   volleyball:{name:'Volley-ball',mode:'sets',unit:'points',sets:{type:'bestof',count:3,points:25,lastPoints:15,lead2:true,cap:0}},
   beachvolley:{name:'Beach-volley',mode:'sets',unit:'points',sets:{type:'bestof',count:3,points:21,lastPoints:15,lead2:true,cap:0}},
-  rugby:{name:'Rugby à XV',mode:'score',unit:'points',draw:true},
-  rugby7:{name:'Rugby à 7',mode:'score',unit:'points',draw:true},
-  touch:{name:'Touch rugby',mode:'score',unit:'essais',draw:true},
-  hockey:{name:'Hockey (gazon / salle)',mode:'score',unit:'buts',draw:true},
-  icehockey:{name:'Hockey sur glace',mode:'score',unit:'buts',draw:true},
-  waterpolo:{name:'Water-polo',mode:'score',unit:'buts',draw:true},
-  floorball:{name:'Floorball / Unihockey',mode:'score',unit:'buts',draw:true},
-  korfball:{name:'Korfbal',mode:'score',unit:'buts',draw:true},
-  netball:{name:'Netball',mode:'score',unit:'buts',draw:true},
+  rugby:{name:'Rugby à XV',mode:'time',unit:'points',draw:true},
+  rugby7:{name:'Rugby à 7',mode:'time',unit:'points',draw:true},
+  touch:{name:'Touch rugby',mode:'time',unit:'essais',draw:true},
+  hockey:{name:'Hockey (gazon / salle)',mode:'time',unit:'buts',draw:true},
+  icehockey:{name:'Hockey sur glace',mode:'time',unit:'buts',draw:true},
+  waterpolo:{name:'Water-polo',mode:'time',unit:'buts',draw:true},
+  floorball:{name:'Floorball / Unihockey',mode:'time',unit:'buts',draw:true},
+  korfball:{name:'Korfbal',mode:'time',unit:'buts',draw:true},
+  netball:{name:'Netball',mode:'time',unit:'buts',draw:true},
   ultimate:{name:'Ultimate',mode:'score',unit:'points',draw:false},
   baseball:{name:'Baseball / Softball',mode:'score',unit:'points',draw:false},
   badminton:{name:'Badminton (équipes)',mode:'sets',unit:'points',sets:{type:'bestof',count:3,points:21,lastPoints:21,lead2:true,cap:30}},
@@ -488,7 +488,7 @@ function applySport(t, key) {
   t.sport = key;
   t.scoring = { mode: s.mode, unit: s.unit, allowDraw: !!s.draw,
     sets: Object.assign({ type: 'bestof', count: 3, points: 25, lastPoints: 15, lead2: true, cap: 0 }, s.sets || {}),
-    forfeitScore: { w: s.mode === 'score' ? 3 : 0, l: 0 }, forfeitSetPoints: (s.sets && s.sets.points) || 25 };
+    forfeitScore: { w: s.mode !== 'sets' ? 3 : 0, l: 0 }, forfeitSetPoints: (s.sets && s.sets.points) || 25 };
   t.points = { win: 3, draw: 1, loss: 0, forfeit: 0, useSetsTable: false, setsTable: {},
     bonusOff: { on: false, margin: 3, pts: 1 }, bonusDef: { on: false, margin: 7, pts: 1 } };
   ensureSetsTable(t);
@@ -584,7 +584,7 @@ function sideData(t, m) {
     const W = m.forfeit === 'a' ? B : A;
     if (sc.mode === 'sets') { const need = sc.sets.type === 'bestof' ? Math.ceil(sc.sets.count / 2) : sc.sets.count; W.sw = need; W.sc = need * (Number(sc.forfeitSetPoints) || 0); }
     else W.sc = Number(sc.forfeitScore.w) || 0;
-    if (sc.mode === 'score') (m.forfeit === 'a' ? A : B).sc = Number(sc.forfeitScore.l) || 0;
+    if (sc.mode !== 'sets') (m.forfeit === 'a' ? A : B).sc = Number(sc.forfeitScore.l) || 0;
   } else if (sc.mode === 'sets') {
     (m.sets || []).forEach(([a, b]) => { A.sc += a; B.sc += b; if (a > b) A.sw++; else if (b > a) B.sw++; });
   } else if (m.score) { A.sc = m.score[0]; B.sc = m.score[1]; }
@@ -1135,9 +1135,10 @@ function cfgFormat(t) {
   ensureSetsTable(t);
   const crit = activeCriteria(t), unused = Object.keys(CRIT).filter(k => !t.tiebreakers.includes(k) && (!CRIT[k].sets || sets));
   return `<div class="grid2"><div class="card"><h3>Format de match</h3>
-    ${lock ? '<div class="note warn">Des scores sont saisis : le type de score et la structure des sets sont verrouillés.</div>' : ''}
-    ${field('Type de score', sel('scoring.mode', [['score', 'Score simple (buts, points, essais…)'], ['sets', 'En sets / manches']], `data-rr ${dis}`))}
-    <div class="fields">${field('Unité de score', inp('scoring.unit', 'placeholder="buts, points…" data-rr'))}</div>
+    ${lock ? '<div class="note warn">Des scores sont saisis : le passage aux sets (ou l\'inverse) et la structure des sets sont verrouillés.</div>' : ''}
+    ${field('Type de score', `<select data-bind="scoring.mode" data-rr>${[['time', 'Au temps : match à durée fixe (buts, points…)'], ['score', 'Score simple : sans durée fixe (buts, points, essais…)'], ['sets', 'En sets / manches']].map(([k, l]) => `<option value="${k}" ${sc.mode === k ? 'selected' : ''} ${lock && (k === 'sets') !== sets ? 'disabled' : ''}>${l}</option>`).join('')}</select>`)}
+    <div class="fields">${field(sc.mode === 'time' ? 'Durée du match (min)' : 'Durée estimée d\'un match (min)', inp('schedule.duration', 'min="1" data-rr', 'number'))}${field('Unité de score', inp('scoring.unit', 'placeholder="buts, points…" data-rr'))}</div>
+    <p class="muted small" style="margin-top:-4px">${sc.mode === 'time' ? 'Durée de jeu de chaque match, utilisée pour le planning.' : 'Durée moyenne d\'un match, utilisée pour construire le planning et estimer la fin du tournoi.'} Elle peut être différente pour chaque phase (onglet Phases).</p>
     <label class="check">${inp('scoring.allowDraw', 'data-rr', 'checkbox')} Match nul possible en poule</label>
     ${sets ? `<div class="fields">
       ${field('Format des sets', sel('scoring.sets.type', [['bestof', 'Au meilleur de…'], ['fixed', 'Nombre de sets fixe']], `data-rr ${dis}`))}
@@ -1233,7 +1234,7 @@ function fmtBlock(t, ph, tb, path, dis) {
     + (f.sets.type === 'bestof' && Number(f.sets.count) > 1 ? field('Set décisif en', inp(`${path}.fmt.sets.lastPoints`, `min="1" ${dis} style="width:70px"`, 'number')) : '') : '';
   const defDur = Number(ph.duration) || t.schedule.duration;
   return `<div class="fmt"><label class="check">${inp(`${path}.fmt.on`, `data-rr ${dis}`, 'checkbox')} ${sets ? 'Format de match spécifique' : 'Durée de match spécifique'}</label>
-    ${f.on ? `<div class="fields">${fs}${tb ? field('Durée des matchs (min)', inp(`${path}.fmt.duration`, `min="1" placeholder="${defDur}" data-rr style="width:80px"`, 'number')) : ''}</div>`
+    ${f.on ? `<div class="fields">${fs}${tb ? field(t.scoring.mode === 'time' ? 'Durée des matchs (min)' : 'Durée estimée (min)', inp(`${path}.fmt.duration`, `min="1" placeholder="${defDur}" data-rr style="width:80px"`, 'number')) : ''}</div>`
       : sets ? `<div class="muted small">${tb ? 'Format de la phase' : 'Format général'} : ${esc(setsFormatLabel(scoringFor(t, tb ? ph : null).sets))}</div>` : ''}</div>`;
 }
 function phaseCard(t, ph, i) {
@@ -1246,7 +1247,7 @@ function phaseCard(t, ph, i) {
     ${draft ? `<button class="icon sm" data-act="phaseMove" data-i="${i}" data-d="-1" ${i === 0 || t.phases[i - 1].status !== 'draft' ? 'disabled' : ''}>↑</button>
     <button class="icon sm" data-act="phaseMove" data-i="${i}" data-d="1" ${i === t.phases.length - 1 ? 'disabled' : ''}>↓</button>
     <button class="icon sm danger" data-act="phaseDel" data-i="${i}">✕</button>` : ''}</div>`;
-  const timing = `<div class="fields">${field('Durée des matchs (min, vide = défaut)', inp(`${p}.duration`, `min="1" placeholder="${t.schedule.duration}" data-rr`, 'number'))}
+  const timing = `<div class="fields">${field(`${t.scoring.mode === 'time' ? 'Durée des matchs' : 'Durée estimée des matchs'} (min, vide = ${t.schedule.duration})`, inp(`${p}.duration`, `min="1" placeholder="${t.schedule.duration}" data-rr`, 'number'))}
     ${field('Heure de début (vide = à la suite)', inp(`${p}.start`, `data-rr ${dis}`, 'time'))}</div>
     ${fmtBlock(t, ph, null, p, fdis)}`;
   const replanNote = !draft ? '<div class="muted small">Après un changement de durée, utilisez « Replanifier » dans l\'onglet Planning.</div>' : '';
@@ -1279,7 +1280,6 @@ function cfgSched(t) {
   const S = t.schedule;
   return `<div class="grid2"><div class="card"><h3>Horaires</h3>
     <div class="fields">${field('Début du tournoi', inp('schedule.start', 'data-rr', 'time'))}
-    ${field('Durée d\'un match (min)', inp('schedule.duration', 'min="1" data-rr', 'number'))}
     ${field('Battement entre matchs (min)', inp('schedule.changeover', 'min="0" data-rr', 'number'))}</div>
     <p class="muted small">Un créneau toutes les ${slotLen(t, null)} minutes.</p>
     <h3>Pauses</h3>
@@ -1360,7 +1360,7 @@ function openMatch(id) {
   const ta = teamOf(m.a), tb = teamOf(m.b), ready = ta && tb, sc = scoringOf(t, m);
   let entry = '';
   if (!ready) entry = '<div class="note">Les équipes de ce match ne sont pas encore connues.</div>';
-  else if (sc.mode === 'score') {
+  else if (sc.mode !== 'sets') {
     entry = `<div class="score-in"><input type="number" min="0" id="sa" value="${m.score && !m.forfeit ? m.score[0] : ''}" autofocus data-inp="mm"><span class="muted">–</span><input type="number" min="0" id="sb" value="${m.score && !m.forfeit ? m.score[1] : ''}" data-inp="mm"></div>`;
   } else {
     const n = Math.max(1, Number(sc.sets.count) || 1);
@@ -1370,10 +1370,10 @@ function openMatch(id) {
   const tbox = ready ? `<div class="tbbox" id="tbbox" style="display:none"><div class="small" style="margin-bottom:6px"><b>Égalité : qui l'emporte ?</b> (prolongation, tirs au but…)</div>
     <label class="check"><input type="radio" name="tbw" value="a" data-inp="mm" ${m.done && m.winner === 'a' ? 'checked' : ''}>${esc(tname(ta))}</label>
     <label class="check"><input type="radio" name="tbw" value="b" data-inp="mm" ${m.done && m.winner === 'b' ? 'checked' : ''}>${esc(tname(tb))}</label>
-    ${sc.mode === 'score' ? `<div class="row small">Tirs au but (optionnel) <input type="number" id="tba" min="0" style="width:64px" value="${m.tab ? m.tab[0] : ''}"> – <input type="number" id="tbb" min="0" style="width:64px" value="${m.tab ? m.tab[1] : ''}"></div>` : ''}</div>` : '';
+    ${sc.mode !== 'sets' ? `<div class="row small">Tirs au but (optionnel) <input type="number" id="tba" min="0" style="width:64px" value="${m.tab ? m.tab[0] : ''}"> – <input type="number" id="tbb" min="0" style="width:64px" value="${m.tab ? m.tab[1] : ''}"></div>` : ''}</div>` : '';
   const teamsOpts = t.teams.map(x => `<option value="${x.id}" ${m.referee === x.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('');
   showModal(`<div class="row"><h3 class="grow" style="margin:0">M${m.num} · ${esc(matchLabel(t, m))}</h3>${m.live && !m.done ? '<span class="badge live">● En cours</span>' : ''}</div>
-    <div class="muted small" style="margin-top:4px">${fmtTime(m.time)} · ${esc(t.schedule.courts[m.court] ?? '')}${sc.mode === 'sets' ? ' · ' + esc(setsFormatLabel(sc.sets)) : ` · ${matchDur(t, m)} min`}</div>
+    <div class="muted small" style="margin-top:4px">${fmtTime(m.time)} · ${esc(t.schedule.courts[m.court] ?? '')}${sc.mode === 'sets' ? ' · ' + esc(setsFormatLabel(sc.sets)) : sc.mode === 'time' ? ` · match de ${matchDur(t, m)} min` : ` · durée estimée ${matchDur(t, m)} min`}</div>
     <div class="mm-teams"><div>${srcTag(m.a)}</div><span class="muted">contre</span><div>${srcTag(m.b)}</div></div>
     ${entry}${tbox}<div class="mm-sum" id="mmsum"></div><div id="mmerr"></div>
     <details style="margin-top:10px"><summary class="small">Horaire, terrain, arbitre</summary><div class="fields" style="margin-top:8px">
@@ -1419,7 +1419,7 @@ function mmAuto(el) {
 function readResult(t, m) {
   const sc = scoringOf(t, m), ko = isKO(m), noDraw = ko || !sc.allowDraw;
   const pickTb = () => { const r = document.querySelector('input[name=tbw]:checked'); return r ? r.value : null; };
-  if (sc.mode === 'score') {
+  if (sc.mode !== 'sets') {
     const a = vnum('sa'), b = vnum('sb');
     if (a === null || b === null) return { error: 'Saisissez les deux scores.', partial: true };
     if (a < 0 || b < 0) return { error: 'Score négatif.' };
