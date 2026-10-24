@@ -113,12 +113,40 @@ h3{font-size:16px;margin-bottom:10px}
 .tb-list .tb b{width:22px;color:var(--muted)}
 .chips{display:flex;gap:6px;flex-wrap:wrap}
 
-/* stepper */
-.stepper{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-bottom:16px}
-.step{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px}
-.step h4{margin-bottom:6px}
-.progress{height:6px;background:var(--chip);border-radius:3px;overflow:hidden;margin:8px 0}
-.progress i{display:block;height:100%;background:var(--ok)}
+/* navigation : sections, bandeau « À faire », assistant, barre des phases */
+.tabs button i{display:inline-flex;width:20px;height:20px;border-radius:50%;background:var(--chip);color:var(--muted);font-style:normal;font-size:12px;align-items:center;justify-content:center;margin-right:7px;vertical-align:-4px}
+.tabs button.on i{background:var(--accent);color:#fff}
+.next{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--accent-soft);border-radius:var(--r);padding:10px 14px;margin:-6px 0 16px}
+.next .lab{font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--accent)}
+.next.ok{background:var(--ok-soft)}
+.next.ok .lab{font-size:16px}
+.wizard{display:flex;gap:4px;overflow-x:auto;margin-bottom:14px;padding-bottom:4px;scrollbar-width:none}
+.wstep{display:inline-flex;align-items:center;gap:7px;border:0;background:none;padding:6px 10px 6px 6px;border-radius:20px;color:var(--muted);white-space:nowrap;font-weight:600}
+.wstep i{width:26px;height:26px;border-radius:50%;background:var(--chip);display:inline-flex;align-items:center;justify-content:center;font-style:normal;font-weight:700;flex:none}
+.wstep.seen i{background:var(--ok-soft);color:var(--ok)}
+.wstep.on{background:var(--accent-soft);color:var(--accent)}
+.wstep.on i{background:var(--accent);color:#fff}
+.step-title{margin-bottom:12px}
+.step-nav{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:8px 0 24px;padding-top:14px;border-top:1px solid var(--line)}
+.recap{margin-top:4px}
+.recap td{text-align:left;padding:4px 6px;border:0;vertical-align:top}
+.recap td:first-child{width:38%}
+.recap-ol{margin:4px 0 0;padding-left:20px;line-height:1.7}
+.launch{text-align:center;padding:24px 16px}
+.launch h3{font-size:19px}
+button.big{font-size:17px;padding:12px 26px}
+.phasebar{padding:12px 14px}
+.pchips{display:flex;align-items:center;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.pchip{display:flex;align-items:center;gap:9px;padding:6px 12px 6px 7px;border-radius:9px;background:var(--chip);white-space:nowrap;border:2px solid transparent}
+.pchip i{width:24px;height:24px;border-radius:50%;background:var(--panel);display:inline-flex;align-items:center;justify-content:center;font-style:normal;font-weight:700;font-size:13px;color:var(--muted)}
+.pchip div{display:flex;flex-direction:column;line-height:1.2}
+.pchip span{font-size:12px;color:var(--muted)}
+.pchip.ok i{background:var(--ok);color:#fff}
+.pchip.act{border-color:var(--accent);background:var(--accent-soft)}
+.pchip.act i{background:var(--accent);color:#fff}
+.pchip.todo{opacity:.7}
+.parrow{color:var(--muted);flex:none}
+.pacts{margin-top:10px}
 
 /* matches */
 .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
@@ -317,7 +345,11 @@ body.display #app{max-width:none;padding:0;height:100vh;display:flex;flex-direct
   .tabs button{padding:11px 10px;font-size:14px}
   .subtabs{flex-wrap:nowrap;overflow-x:auto;margin:0 -10px 12px;padding:0 10px 4px;scrollbar-width:none}
   .card{padding:12px;border-radius:8px}
-  .stepper{grid-template-columns:1fr}
+  .wstep span{display:none}
+  .wstep.on span{display:inline}
+  .step-nav button{flex:1;padding:11px 8px}
+  .step-nav .small{display:none}
+  .next{margin-top:0}
   .filters select{flex:1 1 45%}
   .mrow{grid-template-columns:1fr;gap:3px;padding:9px 10px}
   .mmeta,.mlabel{font-size:12px}
@@ -1141,24 +1173,119 @@ function tStatusBadge(t) {
   if (t.phases.every(p => p.status !== 'draft') && done === total) return '<span class="badge ok">Terminé</span>';
   return `<span class="badge act">En cours · ${done}/${total} matchs</span>`;
 }
+/* ---------- navigation : 3 sections (Préparation → Matchs → Résultats) ---------- */
+const PREP_STEPS = [['general', 'Tournoi & sport'], ['format', 'Format & points'], ['teams', 'Équipes'], ['phases', 'Déroulement'], ['sched', 'Terrains & horaires'], ['launch', 'Récapitulatif & lancement']];
+const RES_TABS = t => [['standings', 'Classements'], ...(generalPhases(t).length ? [['general', 'Classement général']] : []), ...(t.phases.some(p => p.type === 'bracket') ? [['bracket', 'Tableaux']] : []), ['final', 'Classement final']];
+function defaultRes(t) {
+  const fr = finalRanking(t); if (fr && fr.complete) return 'final';
+  const cur = currentPhase(t); return cur && cur.type === 'bracket' ? 'bracket' : 'standings';
+}
+/* ce qu'il reste à faire : une phrase et un bouton, toujours visibles sous l'en-tête */
+function nextStep(t) {
+  if (t.teams.length < 2) return { msg: 'Il faut au moins 2 équipes.', btn: 'Équipes', tab: 'prep', sub: 'teams' };
+  if (!t.phases.length) return { msg: 'Aucune phase : composez le déroulement du tournoi.', btn: 'Déroulement', tab: 'prep', sub: 'phases' };
+  if (!started(t)) return { msg: 'Le tournoi n\'a pas commencé : vérifiez la préparation, puis lancez-le.', btn: 'Récapitulatif & lancement', tab: 'prep', sub: 'launch' };
+  for (let i = 0; i < t.phases.length; i++) {
+    const ph = t.phases[i];
+    if (ph.status === 'draft') return { msg: `« ${esc(t.phases[i - 1].name)} » est terminée. Générez la phase suivante.`, btn: `Générer « ${esc(ph.name)} »`, gen: i, tab: 'matches' };
+    const ms = phaseMatches(t, ph), todo = ms.filter(m => !m.done).length, live = ms.filter(m => m.live && !m.done).length;
+    if (todo) return { msg: `« ${esc(ph.name)} » en cours : ${todo} match${todo > 1 ? 's' : ''} à jouer${live ? `, dont ${live} en cours` : ''}.`, btn: 'Saisir les scores', tab: 'matches', sub: 'list' };
+  }
+  return { msg: 'Tournoi terminé : toutes les phases sont jouées.', btn: 'Classement final', tab: 'results', sub: 'final', done: true };
+}
+function nextBanner(t) {
+  const n = nextStep(t);
+  const here = ui.tab === n.tab && (!n.sub || (n.tab === 'prep' ? ui.cfg : n.tab === 'matches' ? ui.mt : ui.res) === n.sub);
+  const btn = n.gen != null ? `<button class="primary sm" data-act="gen" data-i="${n.gen}">${n.btn}</button>`
+    : here ? '' : `<button class="primary sm" data-act="goto" data-tab="${n.tab}" data-sub="${n.sub || ''}">${n.btn} ›</button>`;
+  return `<div class="next ${n.done ? 'ok' : ''}"><span class="lab">${n.done ? '🏆' : 'À faire'}</span><span class="grow">${n.msg}</span>${btn}</div>`;
+}
 function viewTournament() {
-  const t = T(), hasBracket = t.phases.some(p => p.type === 'bracket');
-  const tabs = [['config', 'Configuration'], ['matches', 'Matchs'], ['standings', 'Classements'], ...(generalPhases(t).length ? [['general', 'Classement général']] : []), ...(hasBracket ? [['bracket', 'Tableaux']] : []), ['planning', 'Planning'], ['final', 'Classement final']];
-  if (!tabs.some(x => x[0] === ui.tab)) ui.tab = 'config';
-  const body = { config: viewConfig, matches: viewMatches, standings: viewStandings, general: viewGeneral, bracket: viewBrackets, planning: viewPlanning, final: viewFinal }[ui.tab](t);
+  const t = T();
+  const tabs = [['prep', 'Préparation'], ['matches', 'Matchs'], ['results', 'Résultats']];
+  if (!tabs.some(x => x[0] === ui.tab)) ui.tab = 'prep';
+  const body = ui.tab === 'prep' ? viewPrep(t) : ui.tab === 'matches' ? viewPlay(t) : viewResults(t);
   return `<header class="top"><button class="ghost home-btn" data-act="home" title="Tous les tournois">‹ <img src="icon.svg" alt="" class="logo-sm"></button>
     <div class="ttl"><h1>${esc(t.name)}</h1><div class="muted small">${esc((SPORTS[t.sport] || SPORTS.other).name)} · ${t.teams.length} équipes${t.date ? ' · ' + fmtDate(t.date) : ''}${t.place ? ' · ' + esc(t.place) : ''}</div></div>
     <div class="row top-actions">${tStatusBadge(t)}<button data-act="display" class="hide-sm">📺 Écran public</button><button data-act="pdf">📄 PDF</button><button data-act="backups">💾 Sauvegardes${fileHandle ? ' ✓' : ''}</button></div></header>
-    <nav class="tabs">${tabs.map(([k, l]) => `<button class="${ui.tab === k ? 'on' : ''}" data-act="tab" data-k="${k}">${l}</button>`).join('')}</nav>
+    <nav class="tabs">${tabs.map(([k, l], i) => `<button class="${ui.tab === k ? 'on' : ''}" data-act="tab" data-k="${k}"><i>${i + 1}</i>${l}</button>`).join('')}</nav>
+    ${nextBanner(t)}
     <main>${body}</main>`;
 }
 
-/* ---------- configuration ---------- */
-function viewConfig(t) {
-  const subs = [['general', 'Tournoi & sport'], ['format', 'Format & points'], ['teams', `Équipes (${t.teams.length})`], ['phases', 'Phases'], ['sched', 'Terrains & horaires']];
-  const body = { general: cfgGeneral, format: cfgFormat, teams: cfgTeams, phases: cfgPhases, sched: cfgSched }[ui.cfg](t);
-  return `<div class="subtabs">${subs.map(([k, l]) => `<button class="${ui.cfg === k ? 'on' : ''}" data-act="cfg" data-k="${k}">${l}</button>`).join('')}</div>${body}`;
+/* ---------- préparation : 6 étapes ---------- */
+function viewPrep(t) {
+  if (!PREP_STEPS.some(s => s[0] === ui.cfg)) ui.cfg = 'general';
+  const idx = PREP_STEPS.findIndex(s => s[0] === ui.cfg), st = started(t);
+  const stepper = `<div class="wizard">${PREP_STEPS.map(([k, l], i) => `<button class="wstep ${i === idx ? 'on' : ''} ${i < idx || st ? 'seen' : ''}" data-act="cfg" data-k="${k}"><i>${i + 1}</i><span>${l}</span></button>`).join('')}</div>`;
+  const body = { general: cfgGeneral, format: cfgFormat, teams: cfgTeams, phases: cfgPhases, sched: cfgSched, launch: cfgLaunch }[ui.cfg](t);
+  const prev = PREP_STEPS[idx - 1], next = PREP_STEPS[idx + 1];
+  const nav = `<div class="step-nav">${prev ? `<button data-act="cfg" data-k="${prev[0]}">‹ ${prev[1]}</button>` : '<span></span>'}<span class="muted small">Étape ${idx + 1} / ${PREP_STEPS.length}</span>${next ? `<button class="primary" data-act="cfg" data-k="${next[0]}">${next[1]} ›</button>` : '<span></span>'}</div>`;
+  return `${stepper}<h2 class="step-title">${idx + 1}. ${PREP_STEPS[idx][1]}</h2>
+    ${st && ui.cfg !== 'launch' ? '<div class="note">Le tournoi est lancé : les réglages qui touchent aux matchs déjà générés sont verrouillés, les autres restent modifiables.</div>' : ''}
+    ${body}${nav}`;
 }
+function cfgLaunch(t) {
+  const sc = t.scoring, P = t.points, S = t.schedule, st = started(t), n = t.teams.length;
+  const unnamed = t.teams.filter(x => /^Équipe \d+$/.test(x.name.trim())).length;
+  const warns = [];
+  if (unnamed) warns.push(`${unnamed} équipe${unnamed > 1 ? 's n\'ont' : ' n\'a'} pas encore de nom (étape 3).`);
+  if (new Set(t.teams.map(x => x.name.trim().toLowerCase())).size < n) warns.push('Deux équipes portent le même nom (étape 3).');
+  if (!t.phases.length) warns.push('Aucune phase (étape 4).');
+  t.phases.forEach(ph => { if (ph.type === 'bracket' && !ph.tableaux.some(tb => tableauRange(tb, n))) warns.push(`« ${esc(ph.name)} » n'a aucun tableau valide (étape 4).`); });
+  const fmt = sc.mode === 'sets' ? setsFormatLabel(sc.sets) : sc.mode === 'time' ? `au temps, ${S.duration} min` : `score simple (${sc.unit})`;
+  const pts = P.useSetsTable && sc.mode === 'sets' ? 'barème selon le score en sets' : `victoire ${P.win}${sc.allowDraw ? `, nul ${P.draw}` : ''}, défaite ${P.loss}`;
+  const row = (l, v) => `<tr><td class="muted small">${l}</td><td>${v}</td></tr>`;
+  const edit = k => st ? '' : `<button class="sm ghost" data-act="cfg" data-k="${k}">Modifier</button>`;
+  const first = t.phases[0];
+  return `<div class="grid2">
+    <div class="card"><div class="row"><h3 class="grow">Tournoi</h3>${edit('general')}</div><table class="recap">${row('Nom', esc(t.name))}${row('Date · lieu', [fmtDate(t.date), esc(t.place)].filter(Boolean).join(' · ') || '—')}${row('Sport', esc((SPORTS[t.sport] || SPORTS.other).name))}</table></div>
+    <div class="card"><div class="row"><h3 class="grow">Format & points</h3>${edit('format')}</div><table class="recap">${row('Match', esc(fmt))}${row('Planning', `${S.duration} min par match + ${S.changeover} min de battement`)}${row('Points', esc(pts))}${row('Départage', esc(activeCriteria(t).map(k => CRIT[k].l(t).replace(/ \(.*\)$/, '')).join(' › ')))}</table></div>
+    <div class="card"><div class="row"><h3 class="grow">Équipes (${n})</h3>${edit('teams')}</div><div class="chips">${t.teams.map(x => teamTag(x.id)).join('')}</div></div>
+    <div class="card"><div class="row"><h3 class="grow">Déroulement</h3>${edit('phases')}</div><ol class="recap-ol">${t.phases.map((ph, i) => `<li><b>${esc(ph.name)}</b> <span class="muted small">— ${phaseInfo(t, ph, i)}</span></li>`).join('') || '<li class="muted">Aucune phase</li>'}</ol></div>
+    <div class="card"><div class="row"><h3 class="grow">Terrains & horaires</h3>${edit('sched')}</div><table class="recap">${row('Terrains', S.courts.map(esc).join(', '))}${row('Début', esc(S.start))}${row('Pauses', (S.breaks || []).map(b => `${esc(b.from)} – ${esc(b.to)}`).join(', ') || 'aucune')}${row('Arbitrage', S.referee ? 'par les équipes au repos' : 'non géré')}</table></div>
+    <div class="card est-card"><h3>Estimation</h3>${estimateHTML(t, true)}</div></div>
+    ${warns.map(w => `<div class="note warn">⚠ ${w}</div>`).join('')}
+    <div class="card launch">${st ? `<h3>Tournoi lancé</h3><p class="muted">La première phase est générée. La suite se passe dans la section Matchs.</p><button class="primary" data-act="goto" data-tab="matches" data-sub="list">Aller aux matchs ›</button>`
+    : `<h3>Tout est prêt ?</h3><p class="muted">Le lancement génère les matchs et le planning de la première phase « ${esc(first ? first.name : '—')} ». Vous pourrez encore renommer les équipes et ajuster les horaires ensuite.</p>
+      <button class="primary big" data-act="gen" data-i="0" ${canGenerate(t, 0) ? '' : 'disabled'}>🚀 Lancer le tournoi</button>`}</div>`;
+}
+
+/* ---------- matchs : barre des phases + liste / planning ---------- */
+function phaseBar(t) {
+  const li = t.phases.reduce((a, p, i) => p.status !== 'draft' ? i : a, -1);   // dernière phase générée
+  const chips = t.phases.map((ph, i) => {
+    const ms = phaseMatches(t, ph), done = ms.filter(m => m.done).length;
+    const cls = ph.status === 'draft' ? 'todo' : done === ms.length ? 'ok' : 'act';
+    const info = ph.status === 'draft' ? 'à générer' : done === ms.length ? 'terminée' : `${done}/${ms.length} matchs`;
+    return `<div class="pchip ${cls}"><i>${cls === 'ok' ? '✓' : i + 1}</i><div><b>${esc(ph.name)}</b><span>${info}</span></div></div>`;
+  }).join('<span class="parrow">›</span>');
+  const acts = [], nx = li + 1;
+  if (t.phases[nx]) acts.push(canGenerate(t, nx) ? `<button class="primary sm" data-act="gen" data-i="${nx}">Générer « ${esc(t.phases[nx].name)} »</button>`
+    : `<span class="muted small">« ${esc(t.phases[nx].name)} » pourra être générée quand « ${esc(t.phases[li].name)} » sera terminée.</span>`);
+  if (li >= 0) {
+    const ph = t.phases[li];
+    if (ph.type === 'pools' && !phaseMatches(t, ph).some(m => m.done)) acts.push(`<button class="sm" data-act="compo" data-i="${li}">Modifier les poules</button>`);
+    acts.push(`<span class="spacer"></span><button class="sm ghost danger" data-act="resetPhase" data-i="${li}">Réinitialiser « ${esc(ph.name)} »</button>`);
+  }
+  return `<div class="card phasebar"><div class="pchips">${chips}</div><div class="row pacts">${acts.join('')}</div></div>`;
+}
+function viewPlay(t) {
+  if (!t.phases.length) return '<div class="card">Aucune phase : composez le déroulement dans Préparation › Déroulement.</div>';
+  if (!['list', 'planning'].includes(ui.mt)) ui.mt = 'list';
+  const subs = [['list', 'Liste des matchs'], ['planning', 'Planning par terrain']];
+  return `${phaseBar(t)}<div class="subtabs">${subs.map(([k, l]) => `<button class="${ui.mt === k ? 'on' : ''}" data-act="mt" data-k="${k}">${l}</button>`).join('')}</div>${ui.mt === 'list' ? viewMatches(t) : viewPlanning(t)}`;
+}
+
+/* ---------- résultats ---------- */
+function viewResults(t) {
+  const tabs = RES_TABS(t);
+  if (!tabs.some(x => x[0] === ui.res)) ui.res = defaultRes(t);
+  const body = { standings: viewStandings, general: viewGeneral, bracket: viewBrackets, final: viewFinal }[ui.res](t);
+  return `<div class="subtabs">${tabs.map(([k, l]) => `<button class="${ui.res === k ? 'on' : ''}" data-act="res" data-k="${k}">${l}</button>`).join('')}</div>${body}`;
+}
+
+/* ---------- configuration ---------- */
 function cfgGeneral(t) {
   const lock = anyDone(t);
   return `<div class="grid2"><div class="card"><h3>Tournoi</h3>
@@ -1166,15 +1293,9 @@ function cfgGeneral(t) {
     <div class="fields">${field('Date', inp('date', '', 'date'))}${field('Lieu', inp('place', 'placeholder="Gymnase, ville…"'))}</div></div>
     <div class="card"><h3>Sport</h3>
     ${field('Sport', `<select data-ch="sport" ${lock ? 'disabled' : ''}>${Object.entries(SPORTS).map(([k, s]) => `<option value="${k}" ${t.sport === k ? 'selected' : ''}>${esc(s.name)}</option>`).join('')}</select>`)}
-    <p class="muted small">Le choix du sport pré-remplit le format de match (score simple ou sets) et l'unité. Tout reste modifiable dans « Format & points ».</p>
+    <p class="muted small">Le choix du sport pré-remplit le format de match (score simple ou sets) et l'unité. Tout reste modifiable à l'étape suivante.</p>
     ${lock ? '<div class="note warn">Des scores sont saisis : le sport ne peut plus être changé.</div>' : ''}</div></div>
-    <div class="card"><h3>Comment ça marche</h3><ol class="small" style="margin:0;padding-left:20px;line-height:1.8">
-    <li>Réglez le <b>format de match</b> et le <b>barème de points</b>, puis l'ordre des <b>critères de départage</b>.</li>
-    <li>Saisissez les <b>équipes</b> (l'ordre sert de classement de départ / têtes de série).</li>
-    <li>Composez les <b>phases</b> : brassage, poules, poules de niveau, phases finales avec matchs de classement et consolante.</li>
-    <li>Indiquez les <b>terrains et horaires</b> (et l'arbitrage par les équipes si besoin).</li>
-    <li>Onglet <b>Matchs</b> : générez la première phase, saisissez les scores ; les classements et la phase suivante en découlent.</li>
-    <li>Ouvrez l'<b>écran public</b> dans une 2e fenêtre, sur la TV ou le vidéoprojecteur.</li></ol></div>`;
+    <div class="note">Préparez le tournoi en 6 étapes, avec les boutons en bas de page. Tout reste modifiable jusqu'au lancement ; après, les équipes se renomment et les horaires s'ajustent encore.</div>`;
 }
 function cfgFormat(t) {
   const sc = t.scoring, P = t.points, lock = anyDone(t), sets = sc.mode === 'sets', dis = lock ? 'disabled' : '';
@@ -1349,25 +1470,6 @@ function cfgSched(t) {
 
 /* ---------- matchs ---------- */
 function viewMatches(t) {
-  const steps = t.phases.map((ph, i) => {
-    const ms = phaseMatches(t, ph), done = ms.filter(m => m.done).length;
-    const pct = ms.length ? Math.round(done / ms.length * 100) : 0;
-    const later = t.phases.slice(i + 1).every(p => p.status === 'draft');
-    let st, actions = '';
-    if (ph.status === 'draft') {
-      st = '<span class="badge">À générer</span>';
-      actions = canGenerate(t, i) ? `<button class="primary sm" data-act="gen" data-i="${i}">Générer les matchs</button>`
-        : `<span class="muted small">${i === 0 ? 'Il faut au moins 2 équipes.' : 'Disponible quand la phase précédente est terminée.'}</span>`;
-    } else {
-      st = done === ms.length ? '<span class="badge ok">Terminée</span>' : `<span class="badge act">${done}/${ms.length} matchs</span>`;
-      if (ph.type === 'pools' && done === 0 && later) actions += `<button class="sm" data-act="compo" data-i="${i}">Modifier les poules</button>`;
-      if (later) actions += `<button class="sm danger" data-act="resetPhase" data-i="${i}">Réinitialiser</button>`;
-    }
-    return `<div class="step"><div class="row"><h4 class="grow">${i + 1}. ${esc(ph.name)}</h4>${st}</div>
-      ${ph.status !== 'draft' ? `<div class="progress"><i style="width:${pct}%"></i></div>` : `<div class="muted small" style="margin:6px 0">${phaseInfo(t, ph, i)}</div>`}
-      <div class="row">${actions}</div></div>`;
-  }).join('');
-  if (!t.phases.length) return '<div class="card">Aucune phase : composez le déroulement dans Configuration › Phases.</div>';
   const f = ui.mf;
   // filtres restés d'un autre tournoi ou d'une phase réinitialisée : retour à « tout »
   if (f.phase !== 'all' && !t.phases.some(p => p.id === f.phase && p.status !== 'draft')) f.phase = 'all';
@@ -1383,8 +1485,7 @@ function viewMatches(t) {
     if (m.time !== last) { list += `<div class="slot-h">${fmtTime(m.time)}</div>`; last = m.time; }
     list += matchRow(t, m);
   }
-  return `<div class="stepper">${steps}</div>
-    ${t.matches.length ? `<div class="filters">
+  return `${t.matches.length ? `<div class="filters">
       <select data-ch="mf" data-k="phase"><option value="all">Toutes les phases</option>${t.phases.filter(p => p.status !== 'draft').map(p => `<option value="${p.id}" ${f.phase === p.id ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</select>
       <select data-ch="mf" data-k="court"><option value="all">Tous les terrains</option>${t.schedule.courts.map((c, i) => `<option value="${i}" ${f.court === String(i) ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select>
       <select data-ch="mf" data-k="status"><option value="all">Tous les matchs</option><option value="todo" ${f.status === 'todo' ? 'selected' : ''}>À jouer</option><option value="done" ${f.status === 'done' ? 'selected' : ''}>Joués</option></select>
@@ -1639,7 +1740,7 @@ function rankingList(t, rows) {
 }
 function viewBrackets(t) {
   const phases = t.phases.filter(p => p.type === 'bracket' && p.status !== 'draft');
-  if (!phases.length) return '<div class="card">Les tableaux apparaîtront une fois la phase finale générée (onglet Matchs).</div>';
+  if (!phases.length) return '<div class="card">Les tableaux apparaîtront une fois la phase finale générée (section Matchs).</div>';
   return phases.reverse().map(ph => `<h2>${esc(ph.name)}</h2>
     ${ph.tableaux.map((tb, ti) => phaseMatches(t, ph).some(m => m.tableau === ti) ? `<div class="card"><h3>${esc(tb.name)} <span class="muted small">(rangs ${ph.ranges[ti][0]} à ${ph.ranges[ti][1]})</span></h3><div class="bracket">${bracketCols(t, ph, ti)}</div></div>` : '').join('')}
     <details class="card"><summary>Classement issu de la phase</summary>${rankingList(t, phaseRanking(t, ph))}</details>`).join('');
@@ -1807,7 +1908,7 @@ function ntEstimate() {
 /* ---------- actions ---------- */
 const A = {
   home() { ui.view = 'home'; render(); },
-  openT(el, e) { if (e.target.closest('button')) return; db.currentId = el.dataset.id; ui.view = 't'; ui.tab = 'config'; ui.cfg = 'general'; ui.mf = { phase: 'all', court: 'all', status: 'all', q: '' }; persist(); invalidate(); render(); },
+  openT(el, e) { if (e.target.closest('button')) return; db.currentId = el.dataset.id; ui.view = 't'; ui.tab = 'prep'; ui.cfg = 'general'; ui.res = null; ui.mf = { phase: 'all', court: 'all', status: 'all', q: '' }; persist(); invalidate(); render(); },
   newT() {
     const ni = (id, v, attrs = '') => `<input id="${id}" type="number" data-inp="nt" value="${v}" ${attrs}>`;
     showModal(`<h3>Nouveau tournoi</h3>${field('Nom', '<input id="ntName" autofocus placeholder="Tournoi de printemps">')}
@@ -1822,7 +1923,7 @@ const A = {
   },
   newTGo() {
     const t = ntBuild(document.getElementById('ntName').value.trim());
-    db.tournaments[t.id] = t; db.currentId = t.id; ui.view = 't'; ui.tab = 'config'; ui.cfg = 'general'; ui.mf = { phase: 'all', court: 'all', status: 'all', q: '' };
+    db.tournaments[t.id] = t; db.currentId = t.id; ui.view = 't'; ui.tab = 'prep'; ui.cfg = 'general'; ui.res = null; ui.mf = { phase: 'all', court: 'all', status: 'all', q: '' };
     closeModal(); save(); render();
   },
   async delT(el) {
@@ -1841,7 +1942,10 @@ const A = {
   exportAll() { download(`tournois-${todayISO()}.json`, JSON.stringify(db, null, 1)); },
   importClick() { document.getElementById('importFile').click(); },
   tab(el) { ui.tab = el.dataset.k; render(); window.scrollTo(0, 0); },
-  cfg(el) { ui.cfg = el.dataset.k; render(); },
+  cfg(el) { ui.cfg = el.dataset.k; render(); window.scrollTo(0, 0); },
+  mt(el) { ui.mt = el.dataset.k; render(); },
+  res(el) { ui.res = el.dataset.k; render(); },
+  goto(el) { ui.tab = el.dataset.tab; const s = el.dataset.sub; if (s) { if (ui.tab === 'prep') ui.cfg = s; else if (ui.tab === 'matches') ui.mt = s; else ui.res = s; } render(); window.scrollTo(0, 0); },
   display() { window.open(location.pathname + location.search + '#ecran', 'tournoi-ecran', 'width=1280,height=720'); },
   backups() { backupsModal(); },
   pdf() { pdfModal(); },
@@ -1901,9 +2005,9 @@ const A = {
   // déroulement
   gen(el) {
     const t = T(), i = Number(el.dataset.i), ph = t.phases[i];
-    if (ph.type === 'bracket' && !ph.tableaux.some(tb => tableauRange(tb, t.teams.length))) return toast('Cette phase n\'a aucun tableau valide (Configuration › Phases).', 4000);
-    generatePhase(t, i); save(); render();
-    toast(`${phaseMatches(t, ph).length} matchs générés pour « ${ph.name} ».`);
+    if (ph.type === 'bracket' && !ph.tableaux.some(tb => tableauRange(tb, t.teams.length))) return toast('Cette phase n\'a aucun tableau valide (Préparation › Déroulement).', 4000);
+    generatePhase(t, i); ui.tab = 'matches'; ui.mt = 'list'; save(); render(); window.scrollTo(0, 0);
+    toast(i === 0 ? `Tournoi lancé : ${phaseMatches(t, ph).length} matchs générés pour « ${ph.name} ».` : `${phaseMatches(t, ph).length} matchs générés pour « ${ph.name} ».`);
   },
   async resetPhase(el) {
     const t = T(), i = Number(el.dataset.i), n = t.phases.slice(i).reduce((s, p) => s + phaseMatches(t, p).filter(m => m.done).length, 0);
@@ -2035,7 +2139,7 @@ document.getElementById('importFile').addEventListener('change', async e => {
       if (db.tournaments[t.id]) { backup('Avant import', db.tournaments[t.id]); t.id = uid(); t.name += ' (import)'; }
       db.tournaments[t.id] = t; last = t;
     });
-    db.currentId = last.id; ui.view = 't'; ui.tab = 'config'; ui.mf = { phase: 'all', court: 'all', status: 'all', q: '' }; closeModal(); invalidate(); persist(); render();
+    db.currentId = last.id; ui.view = 't'; ui.tab = 'prep'; ui.cfg = 'general'; ui.res = null; ui.mf = { phase: 'all', court: 'all', status: 'all', q: '' }; closeModal(); invalidate(); persist(); render();
     toast(`${list.length} tournoi(s) importé(s).`);
   } catch (err) { toast('Fichier invalide : ce n\'est pas une sauvegarde Tournoi Manager.', 4000); }
 });

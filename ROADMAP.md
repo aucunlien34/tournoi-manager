@@ -21,6 +21,7 @@ Application en ligne : https://aucunlien34.github.io/tournoi-manager/
 7. **Feuilles de terrain (PDF)** : pour la phase en cours, une page A4 par terrain avec cases pour noter les scores à la main (par set en volley), arbitre, lignes à remplir pour les équipes pas encore connues.
 8. **Application installable** (Android, iPhone, ordinateur) avec logo, fonctionnement hors ligne.
 9. **Type de score « Au temps »**, durée de match réglée dans Format & points, complétion automatique des scores de set, onglet Classement général séparé.
+10. **Parcours en 3 sections** : Préparation (6 étapes numérotées avec Précédent / Suivant et un récapitulatif de lancement) → Matchs (barre des phases, liste, planning) → Résultats (classements, général, tableaux, final), avec un bandeau « À faire » qui indique toujours la prochaine action.
 
 ## Pistes
 - Saisie des scores par les arbitres sur téléphone (nécessiterait un serveur).
