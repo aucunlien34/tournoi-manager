@@ -60,7 +60,7 @@ h3{font-size:16px;margin-bottom:10px}
 .top{display:flex;align-items:center;gap:12px;padding:14px 0 10px;flex-wrap:wrap}
 .top .ttl{flex:1;min-width:200px}
 .top h1{font-size:21px}
-.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:18px;overflow-x:auto}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:18px;overflow-x:auto;position:sticky;top:0;z-index:6;background:var(--bg)}
 .tabs button{border:0;border-bottom:3px solid transparent;border-radius:0;background:none;padding:10px 14px;color:var(--muted);font-weight:600}
 .tabs button.on{color:var(--accent);border-bottom-color:var(--accent)}
 .subtabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
@@ -121,7 +121,8 @@ h3{font-size:16px;margin-bottom:10px}
 .next .lab{font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--accent)}
 .next.ok{background:var(--ok-soft)}
 .next.ok .lab{font-size:16px}
-.wizard{display:flex;gap:4px;overflow-x:auto;margin-bottom:14px;padding-bottom:4px;scrollbar-width:none}
+.wizard{display:flex;gap:4px;overflow-x:auto;margin-bottom:14px;padding:6px 0;scrollbar-width:none;position:sticky;top:var(--tabs-h,46px);z-index:5;background:var(--bg);border-bottom:1px solid transparent}
+.wizard.stuck{border-bottom-color:var(--line);box-shadow:0 6px 8px -8px rgba(16,24,40,.25)}
 .wstep{display:inline-flex;align-items:center;gap:7px;border:0;background:none;padding:6px 10px 6px 6px;border-radius:20px;color:var(--muted);white-space:nowrap;font-weight:600}
 .wstep i{width:26px;height:26px;border-radius:50%;background:var(--chip);display:inline-flex;align-items:center;justify-content:center;font-style:normal;font-weight:700;flex:none}
 .wstep.seen i{background:var(--ok-soft);color:var(--ok)}
@@ -139,6 +140,9 @@ button.big{font-size:17px;padding:12px 26px}
 .tpls{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
 .tpl{border:2px solid var(--line);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:4px;background:var(--panel)}
 .tpl.on{border-color:var(--accent);background:var(--accent-soft)}
+.tpl.pick{cursor:pointer;transition:border-color .12s,box-shadow .12s}
+.tpl.pick:hover,.tpl.pick:focus-visible{border-color:var(--accent);box-shadow:0 2px 10px rgba(36,99,235,.15);outline:none}
+.tpl-go{font-size:13px;font-weight:700;color:var(--accent);white-space:nowrap}
 .tpl-h{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:15px}
 .tpl-s{font-size:13px;font-weight:600;color:var(--accent)}
 .tpl p{margin:2px 0 6px;flex:1}
@@ -355,7 +359,8 @@ body.display #app{max-width:none;padding:0;height:100vh;display:flex;flex-direct
   .top .ttl{min-width:0;flex-basis:calc(100% - 110px)}
   .top-actions{width:100%;flex-wrap:nowrap}
   .top-actions button{flex:1;padding:8px 6px}
-  .tabs{position:sticky;top:0;background:var(--bg);z-index:5;margin:0 -10px 12px;padding:0 4px;scrollbar-width:none}
+  .tabs{margin:0 -10px 12px;padding:0 4px;scrollbar-width:none}
+  .wizard{margin:0 -10px 12px;padding:6px 10px}
   .tabs button{padding:11px 10px;font-size:14px}
   .subtabs{flex-wrap:nowrap;overflow-x:auto;margin:0 -10px 12px;padding:0 10px 4px;scrollbar-width:none}
   .card{padding:12px;border-radius:8px}
@@ -601,13 +606,13 @@ function structureCard(t) {
   const cards = TEMPLATES.map(x => {
     const on = x.k === cur, phases = x.f(t.teams.length);
     const nb = phases.reduce((s, ph) => s + estimateMatches(t, ph), 0), e = estimateFor(t, phases);
-    return `<div class="tpl ${on ? 'on' : ''}"><div class="tpl-h"><b>${esc(x.l)}</b>${on ? '<span class="badge act">Choisi</span>' : ''}</div>
+    return `<div class="tpl ${on ? 'on' : 'pick'}" ${on ? '' : `data-act="tplApply" data-k="${x.k}" role="button" tabindex="0"`}><div class="tpl-h"><b>${esc(x.l)}</b>${on ? '<span class="badge act">Choisi</span>' : ''}</div>
       <div class="tpl-s">${esc(TPL_DESC[x.k][1])}</div><p class="small muted">${TPL_DESC[x.k][0]}</p>
-      <div class="row"><span class="muted small grow">${phases.length} phase${phases.length > 1 ? 's' : ''} · ${nb} matchs${e ? ` · <b>≈ ${fmtDuration(e.end - e.start)}</b>` : ''}</span>${!st && !on ? `<button class="sm primary" data-act="tplApply" data-k="${x.k}">Choisir</button>` : ''}</div></div>`;
+      <div class="row"><span class="muted small grow">${phases.length} phase${phases.length > 1 ? 's' : ''} · ${nb} matchs${e ? ` · <b>≈ ${fmtDuration(e.end - e.start)}</b>` : ''}</span>${on ? '' : `<span class="tpl-go">${st ? 'Changer' : 'Choisir'} ›</span>`}</div></div>`;
   }).join('');
   const custom = cur === 'custom' ? `<div class="tpl on"><div class="tpl-h"><b>Personnalisé</b><span class="badge act">Choisi</span></div><div class="tpl-s">${esc(t.phases.map(p => p.name).join(' → ') || 'aucune phase')}</div><p class="small muted">Enchaînement composé à la main dans les phases ci-dessous.</p></div>` : '';
   return `<div class="card"><h3>Structure du tournoi</h3>
-    <p class="muted small" style="margin-top:0">${st ? 'Le tournoi est lancé : la structure ne peut plus changer.' : 'Choisissez un modèle, puis ajustez les phases ci-dessous si besoin (nombre de poules, tableaux, formats…).'}</p>
+    <p class="muted small" style="margin-top:0">${st ? 'Le tournoi est lancé : changer de structure efface les matchs déjà générés (un point de restauration est créé avant).' : 'Cliquez sur un modèle pour le choisir, puis ajustez les phases ci-dessous si besoin (nombre de poules, tableaux, formats…).'}</p>
     <div class="tpls">${cards}${custom}</div></div>`;
 }
 const TEMPLATES = [
@@ -1174,11 +1179,17 @@ function selOr(path, choices, attrs = '', unit = '') {
 }
 
 /* ---------- rendu principal ---------- */
+function stickyNav() {
+  const tabs = app.querySelector('.tabs'); if (tabs) document.documentElement.style.setProperty('--tabs-h', tabs.offsetHeight + 'px');
+  const wz = app.querySelector('.wizard'); if (wz) wz.classList.toggle('stuck', wz.getBoundingClientRect().top <= tabs.offsetHeight + 1 && window.scrollY > 0);
+}
+window.addEventListener('scroll', () => { if (!DISPLAY) stickyNav(); }, { passive: true });
+window.addEventListener('resize', () => { if (!DISPLAY) stickyNav(); });
 function render() {
   if (DISPLAY) return renderDisplay();
   const ae = document.activeElement, key = ae && ae !== document.body ? (ae.dataset.bind || ae.dataset.k || ae.id) : null;
   if (ui.view === 'home' || !T()) { ui.view = 'home'; app.innerHTML = viewHome(); }
-  else app.innerHTML = viewTournament();
+  else { app.innerHTML = viewTournament(); stickyNav(); }
   if (key) {
     const el = app.querySelector(`[data-bind="${CSS.escape(key)}"]`) || app.querySelector(`[data-k="${CSS.escape(key)}"]`) || document.getElementById(key);
     if (el && el.focus) { el.focus(); if (el.type === 'text' || el.type === 'search') { const l = el.value.length; try { el.setSelectionRange(l, l); } catch (e) {} } }
@@ -2063,8 +2074,12 @@ const A = {
   // phases
   async tplApply(el) {
     const t = T(), tp = TEMPLATES.find(x => x.k === el.dataset.k);
-    if (t.phases.length && !await askConfirm(`Remplacer les phases actuelles par le modèle « ${esc(tp.l)} » ?`, 'Remplacer', false)) return;
-    t.phases = tp.f(t.teams.length); save(); render();
+    if (started(t)) {
+      const ms = t.matches.length, done = t.matches.filter(m => m.done).length;
+      if (!await askConfirm(`Le tournoi est lancé. Passer à « ${esc(tp.l)} » supprime les <b>${ms} matchs</b> générés${done ? `, dont <b>${done} résultat${done > 1 ? 's' : ''} saisi${done > 1 ? 's' : ''}</b>` : ''}, et le tournoi revient en préparation.<br>Un point de restauration est créé avant (menu 💾 Sauvegardes).`, 'Changer de structure')) return;
+      resetPhase(t, 0);
+    } else if (t.phases.length && !await askConfirm(`Remplacer les phases actuelles par le modèle « ${esc(tp.l)} » ?`, 'Remplacer', false)) return;
+    t.phases = tp.f(t.teams.length); save(); render(); toast(`Structure : ${tp.l}`);
   },
   phaseAdd(el) { const t = T(); t.phases.push(el.dataset.k === 'pools' ? poolsPhase({ name: t.phases.length ? 'Poules de niveau' : 'Poules', distribution: t.phases.length ? 'level' : 'serpentine', levels: !!t.phases.length }) : bracketPhase({ tableaux: defaultTableaux(t.teams.length) })); save(); render(); },
   phaseMove(el) { const t = T(), i = Number(el.dataset.i), j = i + Number(el.dataset.d); [t.phases[i], t.phases[j]] = [t.phases[j], t.phases[i]]; save(); render(); },
@@ -2199,6 +2214,7 @@ document.addEventListener('input', e => {
   else if (k === 'mfq') { ui.mf.q = e.target.value; render(); }
 });
 document.addEventListener('keydown', e => {
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.classList && e.target.classList.contains('pick')) { e.preventDefault(); e.target.click(); return; }
   if (e.key === 'Escape' && document.getElementById('modal').innerHTML && !document.getElementById('confirm').innerHTML) closeModal();
   if (e.key === 'Enter' && ui.mm && e.target.tagName === 'INPUT' && document.getElementById('mmsum')) { e.preventDefault(); const mm = mById(ui.mm); mm && mm.live && !mm.done ? A.mmLiveSave() : A.mmSave(); }
   // Tab après une saisie complétée automatiquement : on passe directement au set suivant
