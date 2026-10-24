@@ -173,6 +173,7 @@ details>summary{cursor:pointer;font-weight:600;padding:6px 0}
 .score-in input:first-child{justify-self:end}
 .sets-in{display:grid;grid-template-columns:auto 1fr 1fr;gap:6px 10px;align-items:center;max-width:360px;margin:0 auto}
 .sets-in input{width:100%;text-align:center;font-size:18px;font-weight:600}
+.sets-in input.auto{color:var(--accent);background:var(--accent-soft)}
 .mm-sum{text-align:center;margin:12px 0 4px;font-weight:600;min-height:22px}
 .tbbox{background:var(--warn-soft);border-radius:8px;padding:10px;margin-top:10px}
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1b2330;color:#fff;padding:10px 16px;border-radius:8px;z-index:70;box-shadow:0 8px 20px rgba(0,0,0,.25);max-width:90vw}
@@ -1096,9 +1097,9 @@ function tStatusBadge(t) {
 }
 function viewTournament() {
   const t = T(), hasBracket = t.phases.some(p => p.type === 'bracket');
-  const tabs = [['config', 'Configuration'], ['matches', 'Matchs'], ['standings', 'Classements'], ...(hasBracket ? [['bracket', 'Tableaux']] : []), ['planning', 'Planning'], ['final', 'Classement final']];
+  const tabs = [['config', 'Configuration'], ['matches', 'Matchs'], ['standings', 'Classements'], ...(generalPhases(t).length ? [['general', 'Classement général']] : []), ...(hasBracket ? [['bracket', 'Tableaux']] : []), ['planning', 'Planning'], ['final', 'Classement final']];
   if (!tabs.some(x => x[0] === ui.tab)) ui.tab = 'config';
-  const body = { config: viewConfig, matches: viewMatches, standings: viewStandings, bracket: viewBrackets, planning: viewPlanning, final: viewFinal }[ui.tab](t);
+  const body = { config: viewConfig, matches: viewMatches, standings: viewStandings, general: viewGeneral, bracket: viewBrackets, planning: viewPlanning, final: viewFinal }[ui.tab](t);
   return `<header class="top"><button class="ghost" data-act="home">‹ Tournois</button>
     <div class="ttl"><h1>${esc(t.name)}</h1><div class="muted small">${esc((SPORTS[t.sport] || SPORTS.other).name)} · ${t.teams.length} équipes${t.date ? ' · ' + fmtDate(t.date) : ''}${t.place ? ' · ' + esc(t.place) : ''}</div></div>
     <div class="row top-actions">${tStatusBadge(t)}<button data-act="display" class="hide-sm">📺 Écran public</button><button data-act="pdf">📄 PDF</button><button data-act="backups">💾 Sauvegardes${fileHandle ? ' ✓' : ''}</button></div></header>
@@ -1322,6 +1323,9 @@ function viewMatches(t) {
   }).join('');
   if (!t.phases.length) return '<div class="card">Aucune phase : composez le déroulement dans Configuration › Phases.</div>';
   const f = ui.mf;
+  // filtres restés d'un autre tournoi ou d'une phase réinitialisée : retour à « tout »
+  if (f.phase !== 'all' && !t.phases.some(p => p.id === f.phase && p.status !== 'draft')) f.phase = 'all';
+  if (f.court !== 'all' && !t.schedule.courts[Number(f.court)]) f.court = 'all';
   let ms = t.matches.slice();
   if (f.phase !== 'all') ms = ms.filter(m => m.phaseId === f.phase);
   if (f.court !== 'all') ms = ms.filter(m => String(m.court) === f.court);
@@ -1391,6 +1395,24 @@ function setWarn(s, i, a, b) {
   if (s.lead2 && hi - lo < 2) return `set ${i + 1} : écart inférieur à 2`;
   if (hi > target && (s.lead2 ? hi - lo !== 2 : true)) return `set ${i + 1} : score inhabituel`;
   return null;
+}
+/* complétion automatique d'un set : le score saisi suffit parfois à déduire celui de l'adversaire
+   (17 → 25 ; 24 → 26 avec deux points d'écart). Au-delà du score cible, c'est ambigu : on ne devine pas. */
+function guessOther(s, i, v) {
+  if (v == null || v < 0) return null;
+  const target = s.type === 'bestof' && i === s.count - 1 ? Number(s.lastPoints) || Number(s.points) : Number(s.points), cap = Number(s.cap) || 0;
+  if (v <= target - 2) return target;
+  if (v === target - 1) return s.lead2 ? (cap && target + 1 > cap ? cap : target + 1) : target;
+  return null;
+}
+function mmAuto(el) {
+  const r = /^s(\d+)([ab])$/.exec(el.id); if (!r) return;
+  const other = document.getElementById(`s${r[1]}${r[2] === 'a' ? 'b' : 'a'}`);
+  delete el.dataset.auto; el.classList.remove('auto');
+  if (!other || (other.value !== '' && !other.dataset.auto)) return;
+  const g = guessOther(scoringOf(T(), mById(ui.mm)).sets, Number(r[1]), num(el.value));
+  if (g == null) { if (other.dataset.auto) { other.value = ''; delete other.dataset.auto; other.classList.remove('auto'); } }
+  else { other.value = g; other.dataset.auto = '1'; other.classList.add('auto'); }
 }
 function readResult(t, m) {
   const sc = scoringOf(t, m), ko = isKO(m), noDraw = ko || !sc.allowDraw;
@@ -1497,14 +1519,17 @@ function destOf(t, i, grank) {
 function viewStandings(t) {
   const phases = t.phases.map((ph, i) => [ph, i]).filter(([ph]) => ph.type === 'pools' && ph.status !== 'draft');
   if (!phases.length) return '<div class="card">Les classements apparaîtront une fois une phase de poules générée.</div>';
-  return phases.reverse().map(([ph, i]) => {
-    const g = phaseRanking(t, ph), names = ph.pools.map(p => p.name);
-    return `<h2>${esc(ph.name)} ${phaseComplete(t, ph) ? '<span class="badge ok">Terminée</span>' : '<span class="badge act">En cours</span>'}</h2>
+  return phases.reverse().map(([ph]) => `<h2>${esc(ph.name)} ${phaseComplete(t, ph) ? '<span class="badge ok">Terminée</span>' : '<span class="badge act">En cours</span>'}</h2>
     <div class="tables">${ph.pools.map((p, pi) => `<div class="card"><h3>${esc(p.name)}</h3>${standingsTable(t, poolStandings(t, ph, pi))}</div>`).join('')}</div>
-    ${ph.pools.length > 1 ? `<details class="card" style="margin-top:14px" ${t.phases[i + 1] ? 'open' : ''}><summary>Classement général de la phase ${ph.levels ? '(ordre des poules de niveau)' : '(par rang en poule, puis moyennes par match)'}</summary>
-      <div style="overflow-x:auto;margin-top:8px">${standingsTable(t, g, { rankKey: 'grank', pool: names, dest: t.phases[i + 1] ? r => destOf(t, i, r.grank) : null })}</div></details>` : ''}
-    <div style="height:18px"></div>`;
-  }).join('');
+    <div style="height:18px"></div>`).join('');
+}
+const generalPhases = t => t.phases.map((ph, i) => [ph, i]).filter(([ph]) => ph.type === 'pools' && ph.status !== 'draft' && ph.pools.length > 1);
+function viewGeneral(t) {
+  const phases = generalPhases(t);
+  if (!phases.length) return '<div class="card">Le classement général apparaît pour les phases à plusieurs poules.</div>';
+  return phases.reverse().map(([ph, i]) => `<div class="card"><div class="row" style="margin-bottom:8px"><h2 class="grow" style="margin:0">${esc(ph.name)}</h2>${phaseComplete(t, ph) ? '<span class="badge ok">Terminée</span>' : '<span class="badge act">En cours</span>'}</div>
+    <p class="muted small" style="margin-top:0">${ph.levels ? 'Ordre des poules de niveau : toutes les équipes de la poule 1, puis de la poule 2…' : 'Par rang dans la poule (tous les 1ers, puis tous les 2es…), puis départage par les moyennes par match.'}${t.phases[i + 1] ? ` La colonne « Suite » indique la destination dans « ${esc(t.phases[i + 1].name)} ».` : ''}</p>
+    <div style="overflow-x:auto">${standingsTable(t, phaseRanking(t, ph), { rankKey: 'grank', pool: ph.pools.map(p => p.name), dest: t.phases[i + 1] ? r => destOf(t, i, r.grank) : null })}</div></div>`).join('');
 }
 
 /* ---------- tableaux ---------- */
@@ -1710,7 +1735,7 @@ const A = {
   },
   newTGo() {
     const t = ntBuild(document.getElementById('ntName').value.trim());
-    db.tournaments[t.id] = t; db.currentId = t.id; ui.view = 't'; ui.tab = 'config'; ui.cfg = 'general';
+    db.tournaments[t.id] = t; db.currentId = t.id; ui.view = 't'; ui.tab = 'config'; ui.cfg = 'general'; ui.mf = { phase: 'all', court: 'all', status: 'all', q: '' };
     closeModal(); save(); render();
   },
   async delT(el) {
@@ -1884,19 +1909,25 @@ document.addEventListener('change', e => {
 });
 document.addEventListener('input', e => {
   const k = e.target.dataset.inp;
-  if (k === 'mm') mmUpdate();
+  if (k === 'mm') { mmAuto(e.target); mmUpdate(); }
   else if (k === 'nt') ntEstimate();
   else if (k === 'mfq') { ui.mf.q = e.target.value; render(); }
 });
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && document.getElementById('modal').innerHTML && !document.getElementById('confirm').innerHTML) closeModal();
   if (e.key === 'Enter' && ui.mm && e.target.tagName === 'INPUT' && document.getElementById('mmsum')) { e.preventDefault(); A.mmSave(); }
+  // Tab après une saisie complétée automatiquement : on passe directement au set suivant
+  if (e.key === 'Tab' && !e.shiftKey && ui.mm) {
+    const r = /^s(\d+)a$/.exec(e.target.id), other = r && document.getElementById(`s${r[1]}b`);
+    if (other && other.dataset.auto) { e.preventDefault(); (document.getElementById(`s${Number(r[1]) + 1}a`) || document.querySelector('[data-act="mmSave"]')).focus(); }
+  }
   if (DISPLAY) {
     if (e.key === 'ArrowRight') { dIdx++; renderDisplay(); scheduleRotate(); }
     if (e.key === 'ArrowLeft') { dIdx--; renderDisplay(); scheduleRotate(); }
     if (e.key === 'f' || e.key === 'F') A.fs();
   }
 });
+document.addEventListener('focusin', e => { if (e.target.closest && e.target.closest('#modal') && e.target.type === 'number') e.target.select(); });
 document.getElementById('importFile').addEventListener('change', async e => {
   const f = e.target.files[0]; e.target.value = ''; if (!f) return;
   try {
@@ -1908,7 +1939,7 @@ document.getElementById('importFile').addEventListener('change', async e => {
       if (db.tournaments[t.id]) { backup('Avant import', db.tournaments[t.id]); t.id = uid(); t.name += ' (import)'; }
       db.tournaments[t.id] = t; last = t;
     });
-    db.currentId = last.id; ui.view = 't'; ui.tab = 'config'; closeModal(); invalidate(); persist(); render();
+    db.currentId = last.id; ui.view = 't'; ui.tab = 'config'; ui.mf = { phase: 'all', court: 'all', status: 'all', q: '' }; closeModal(); invalidate(); persist(); render();
     toast(`${list.length} tournoi(s) importé(s).`);
   } catch (err) { toast('Fichier invalide : ce n\'est pas une sauvegarde Tournoi Manager.', 4000); }
 });
