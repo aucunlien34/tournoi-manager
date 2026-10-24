@@ -187,6 +187,15 @@ details>summary{cursor:pointer;font-weight:600;padding:6px 0}
 .score-in input:first-child{justify-self:end}
 .sets-in{display:grid;grid-template-columns:auto 1fr 1fr;gap:6px 10px;align-items:center;max-width:360px;margin:0 auto}
 .sets-in input{width:100%;text-align:center;font-size:18px;font-weight:600}
+.mm-state{margin:12px 0 0;padding:8px 12px;border-radius:8px;font-weight:600;font-size:14px;text-align:center}
+.mm-state.todo{background:var(--chip);color:var(--muted)}
+.mm-state.live{background:var(--danger-soft);color:var(--danger)}
+.mm-state.done{background:var(--ok-soft);color:var(--ok)}
+.mm-main{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:6px 0 4px}
+.mm-main button{padding:11px 18px;font-size:15px;min-width:200px}
+.live-sc{color:var(--danger)}
+.d-score{font-size:3.6vh;font-weight:800;color:#ff8a8a;font-variant-numeric:tabular-nums;text-align:center}
+.d-score small{font-size:2vh;color:#c6d2e6;display:block}
 .sets-in input.auto{color:var(--accent);background:var(--accent-soft)}
 .mm-sum{text-align:center;margin:12px 0 4px;font-weight:600;min-height:22px}
 .tbbox{background:var(--warn-soft);border-radius:8px;padding:10px;margin-top:10px}
@@ -340,6 +349,7 @@ body.display #app{max-width:none;padding:0;height:100vh;display:flex;flex-direct
   .score-in input{font-size:32px;padding:12px}
   .sets-in{max-width:none}
   .sets-in input{font-size:22px;padding:11px}
+  .mm-main button{flex:1 1 100%;min-width:0;padding:13px}
   .plan-grid{display:none}
   .plan-list{display:block}
   .est{gap:16px}
@@ -620,7 +630,7 @@ function pointsFor(t, m, side, d) {
   return p;
 }
 function scoreHTML(t, m) {
-  if (!m.done) return '<span class="muted">–</span>';
+  if (!m.done) { const l = m.live && liveScoreHTML(t, m); return l ? `<span class="sc live-sc">${l}</span><small>en cours</small>` : '<span class="muted">–</span>'; }
   if (m.forfeit) return `<span class="sc">F</span><small>forfait ${esc(tname(teamOf(m[m.forfeit])))}</small>`;
   if (t.scoring.mode === 'sets') { const d = sideData(t, m); return `<span class="sc">${d.a.sw} – ${d.b.sw}</span><small>${(m.sets || []).map(s => s.join('-')).join(' · ')}</small>`; }
   return `<span class="sc">${m.score[0]} – ${m.score[1]}</span>${m.tab ? `<small>t.a.b. ${m.tab[0]}-${m.tab[1]}</small>` : (m.winner !== 'draw' && m.score[0] === m.score[1] ? '<small>après départage</small>' : '')}`;
@@ -1394,31 +1404,44 @@ function openMatch(id) {
   const t = T(), m = mById(id); if (!m) return;
   ui.mm = id;
   const ta = teamOf(m.a), tb = teamOf(m.b), ready = ta && tb, sc = scoringOf(t, m);
+  const live = m.live && !m.done, ls = !m.done && m.liveScore ? m.liveScore : null;   // score provisoire d'un match en cours
+  const sv = v => v == null ? '' : v;
   let entry = '';
   if (!ready) entry = '<div class="note">Les équipes de ce match ne sont pas encore connues.</div>';
   else if (sc.mode !== 'sets') {
-    entry = `<div class="score-in"><input type="number" min="0" id="sa" value="${m.score && !m.forfeit ? m.score[0] : ''}" autofocus data-inp="mm"><span class="muted">–</span><input type="number" min="0" id="sb" value="${m.score && !m.forfeit ? m.score[1] : ''}" data-inp="mm"></div>`;
+    const s = m.score && !m.forfeit ? m.score : ls && ls.score ? ls.score : ['', ''];
+    entry = `<div class="score-in"><input type="number" min="0" id="sa" value="${sv(s[0])}" autofocus data-inp="mm"><span class="muted">–</span><input type="number" min="0" id="sb" value="${sv(s[1])}" data-inp="mm"></div>`;
   } else {
     const n = Math.max(1, Number(sc.sets.count) || 1);
     entry = `<div class="sets-in"><span></span><b class="small" style="text-align:center">${esc(tname(ta))}</b><b class="small" style="text-align:center">${esc(tname(tb))}</b>
-      ${Array.from({ length: n }, (_, i) => { const s = (!m.forfeit && m.sets && m.sets[i]) || ['', '']; return `<span class="muted small">Set ${i + 1}</span><input type="number" min="0" id="s${i}a" value="${s[0]}" data-inp="mm" ${i === 0 ? 'autofocus' : ''}><input type="number" min="0" id="s${i}b" value="${s[1]}" data-inp="mm">`; }).join('')}</div>`;
+      ${Array.from({ length: n }, (_, i) => { const s = (!m.forfeit && m.sets && m.sets[i]) || (ls && ls.sets && ls.sets[i]) || ['', '']; return `<span class="muted small">Set ${i + 1}</span><input type="number" min="0" id="s${i}a" value="${sv(s[0])}" data-inp="mm" ${i === 0 ? 'autofocus' : ''}><input type="number" min="0" id="s${i}b" value="${sv(s[1])}" data-inp="mm">`; }).join('')}</div>`;
   }
+  // état du match et boutons principaux, juste sous la saisie
+  const state = !ready ? '' : m.done ? '<div class="mm-state done">✓ Match terminé — résultat final enregistré</div>'
+    : live ? '<div class="mm-state live">● Match en cours — score provisoire, pas encore compté au classement</div>'
+    : '<div class="mm-state todo">Match à jouer</div>';
+  const main = !ready ? `<div class="mm-main"><button class="primary" data-act="mmSave">Enregistrer</button></div>`
+    : m.done ? `<div class="mm-main"><button class="primary" data-act="mmSave">Enregistrer les modifications</button></div>`
+    : live ? `<div class="mm-main"><button data-act="mmLiveSave">💾 Enregistrer le score en cours</button><button class="primary" data-act="mmSave">🏁 Terminer le match</button></div>`
+    : `<div class="mm-main"><button data-act="mmLiveSave">▶ Démarrer le match</button><button class="primary" data-act="mmSave">🏁 Enregistrer le résultat final</button></div>`;
   const tbox = ready ? `<div class="tbbox" id="tbbox" style="display:none"><div class="small" style="margin-bottom:6px"><b>Égalité : qui l'emporte ?</b> (prolongation, tirs au but…)</div>
     <label class="check"><input type="radio" name="tbw" value="a" data-inp="mm" ${m.done && m.winner === 'a' ? 'checked' : ''}>${esc(tname(ta))}</label>
     <label class="check"><input type="radio" name="tbw" value="b" data-inp="mm" ${m.done && m.winner === 'b' ? 'checked' : ''}>${esc(tname(tb))}</label>
     ${sc.mode !== 'sets' ? `<div class="row small">Tirs au but (optionnel) <input type="number" id="tba" min="0" style="width:64px" value="${m.tab ? m.tab[0] : ''}"> – <input type="number" id="tbb" min="0" style="width:64px" value="${m.tab ? m.tab[1] : ''}"></div>` : ''}</div>` : '';
   const teamsOpts = t.teams.map(x => `<option value="${x.id}" ${m.referee === x.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('');
-  showModal(`<div class="row"><h3 class="grow" style="margin:0">M${m.num} · ${esc(matchLabel(t, m))}</h3>${m.live && !m.done ? '<span class="badge live">● En cours</span>' : ''}</div>
+  showModal(`<div class="row"><h3 class="grow" style="margin:0">M${m.num} · ${esc(matchLabel(t, m))}</h3>${live ? '<span class="badge live">● En cours</span>' : ''}</div>
     <div class="muted small" style="margin-top:4px">${fmtTime(m.time)} · ${esc(t.schedule.courts[m.court] ?? '')}${sc.mode === 'sets' ? ' · ' + esc(setsFormatLabel(sc.sets)) : sc.mode === 'time' ? ` · match de ${matchDur(t, m)} min` : ` · durée estimée ${matchDur(t, m)} min`}</div>
+    ${state}
     <div class="mm-teams"><div>${srcTag(m.a)}</div><span class="muted">contre</span><div>${srcTag(m.b)}</div></div>
     ${entry}${tbox}<div class="mm-sum" id="mmsum"></div><div id="mmerr"></div>
+    ${main}
     <details style="margin-top:10px"><summary class="small">Horaire, terrain, arbitre</summary><div class="fields" style="margin-top:8px">
       ${field('Heure', `<input type="time" id="mtime" value="${m.time != null ? fmtTime(m.time) : ''}">`)}
       ${field('Terrain', `<select id="mcourt">${t.schedule.courts.map((c, i) => `<option value="${i}" ${m.court === i ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select>`)}
       ${field('Arbitre', `<select id="mref"><option value="">—</option>${teamsOpts}</select>`)}</div></details>
     <div class="actions">${ready ? `<button class="danger" data-act="mmForfeit" data-side="a">Forfait ${esc(tname(ta))}</button><button class="danger" data-act="mmForfeit" data-side="b">Forfait ${esc(tname(tb))}</button>` : ''}
-      ${m.done ? '<button data-act="mmClear">Effacer le résultat</button>' : ready ? `<button data-act="mmLive">${m.live ? '■ Plus en cours' : '▶ Match en cours'}</button>` : ''}<span class="spacer"></span>
-      <button data-act="modalClose">Annuler</button><button class="primary" data-act="mmSave">Enregistrer</button></div>`);
+      ${m.done ? '<button data-act="mmClear">Effacer le résultat</button>' : live ? '<button data-act="mmLive" title="Le match n\'a pas encore commencé">■ Pas encore commencé</button>' : ''}<span class="spacer"></span>
+      <button data-act="modalClose">Fermer sans enregistrer</button></div>`);
   mmUpdate();
 }
 const vnum = id => { const el = document.getElementById(id); return el ? num(el.value) : null; };
@@ -1451,6 +1474,26 @@ function mmAuto(el) {
   const g = guessOther(scoringOf(T(), mById(ui.mm)).sets, Number(r[1]), num(el.value));
   if (g == null) { if (other.dataset.auto) { other.value = ''; delete other.dataset.auto; other.classList.remove('auto'); } }
   else { other.value = g; other.dataset.auto = '1'; other.classList.add('auto'); }
+}
+/* score provisoire d'un match en cours : on garde ce qui est saisi, même incomplet */
+function readPartial(t, m) {
+  if (scoringOf(t, m).mode !== 'sets') return { score: [vnum('sa'), vnum('sb')] };
+  const sets = [];
+  for (let i = 0; document.getElementById(`s${i}a`); i++) {
+    const a = vnum(`s${i}a`), b = vnum(`s${i}b`);
+    if (a !== null || b !== null) sets[i] = [a, b];
+  }
+  return { sets: Array.from(sets, s => s || [null, null]) };
+}
+function liveScoreHTML(t, m, ls = m.liveScore) {
+  if (!ls) return '';
+  const z = v => v == null ? 0 : v;
+  if (ls.score) return `${z(ls.score[0])} – ${z(ls.score[1])}`;
+  const sets = (ls.sets || []).filter(Boolean); if (!sets.length) return '';
+  const s = scoringOf(t, m).sets, over = (x, i) => { const tg = setTarget(s, i), hi = Math.max(z(x[0]), z(x[1])), lo = Math.min(z(x[0]), z(x[1])); return hi >= tg && (!s.lead2 || hi - lo >= 2 || (s.cap && hi >= s.cap)); };
+  let wa = 0, wb = 0; sets.forEach((x, i) => { if (over(x, i)) z(x[0]) > z(x[1]) ? wa++ : wb++; });
+  const cur = sets[sets.length - 1];
+  return `${wa} – ${wb}${!over(cur, sets.length - 1) ? ` <small>(${z(cur[0])}-${z(cur[1])})</small>` : ''}`;
 }
 function readResult(t, m) {
   const sc = scoringOf(t, m), ko = isKO(m), noDraw = ko || !sc.allowDraw;
@@ -1499,9 +1542,15 @@ function mmUpdate() {
   if (!teamOf(m.a) || !teamOf(m.b)) return;
   const r = readResult(t, m), box = document.getElementById('tbbox'), sum = document.getElementById('mmsum');
   if (box) box.style.display = r.needTb ? '' : 'none';
+  const warn = r.warns && r.warns.length ? `<div class="small" style="color:var(--warn);font-weight:400">⚠ ${esc(r.warns.join(' · '))}</div>` : '';
+  if (m.live && !m.done) {   // match en cours : on montre le score provisoire, pas un vainqueur
+    const l = liveScoreHTML(t, m, readPartial(t, m));
+    sum.innerHTML = l ? `<span class="live-sc">Score en cours : ${l}</span>${!r.error && !r.warns.length ? `<div class="small muted" style="font-weight:400">Score complet : « Terminer le match » donnera la victoire à ${esc(r.data.winner === 'draw' ? 'personne (match nul)' : tname(teamOf(m[r.data.winner])))}.</div>` : ''}` : '';
+    return;
+  }
   if (r.error) { sum.innerHTML = r.partial ? '' : `<span style="color:var(--danger)">${esc(r.error)}</span>`; return; }
   const w = r.data.winner;
-  sum.innerHTML = (w === 'draw' ? 'Match nul' : `Vainqueur : ${esc(tname(teamOf(m[w])))}`) + (r.warns.length ? `<div class="small" style="color:var(--warn);font-weight:400">⚠ ${esc(r.warns.join(' · '))}</div>` : '');
+  sum.innerHTML = (w === 'draw' ? 'Match nul' : `Vainqueur : ${esc(tname(teamOf(m[w])))}`) + warn;
 }
 function applyDetails(m) {
   const tm = parseTime(document.getElementById('mtime')?.value); if (tm != null && fmtTime(tm) !== fmtTime(m.time)) m.time = tm;
@@ -1882,7 +1931,15 @@ const A = {
     const r = readResult(t, m);
     if (r.error) { document.getElementById('mmerr').innerHTML = `<div class="note err">${esc(r.error)}</div>`; mmUpdate(); return; }
     if (!m.done && !await confirmEarly(t, m)) return;
-    commitResult(m, x => { applyDetails(x); Object.assign(x, { score: null, sets: null, forfeit: null, tab: null }, r.data, { done: true, live: false, doneAt: Date.now() }); });
+    if (r.warns.length && !await askConfirm(`Score inhabituel : ${esc(r.warns.join(' · '))}.<br>Enregistrer ce résultat comme définitif ?`, 'Enregistrer quand même', false)) return;
+    commitResult(m, x => { applyDetails(x); Object.assign(x, { score: null, sets: null, forfeit: null, tab: null }, r.data, { done: true, live: false, liveScore: null, doneAt: Date.now() }); });
+  },
+  mmLiveSave() {
+    const t = T(), m = mById(ui.mm), started = m.live;
+    applyDetails(m); m.liveScore = readPartial(t, m);
+    if (!m.live) { m.live = true; t.matches.forEach(x => { if (x !== m && x.live && !x.done && x.court === m.court) x.live = false; }); }
+    save(); closeModal(); render();
+    toast(started ? `M${m.num} : score en cours enregistré.` : `M${m.num} a commencé.`);
   },
   mmLive() {
     const m = mById(ui.mm), t = T();
@@ -1893,7 +1950,7 @@ const A = {
   async mmForfeit(el) {
     const m = mById(ui.mm), side = el.dataset.side;
     if (!await askConfirm(`Déclarer <b>${esc(tname(teamOf(m[side])))}</b> forfait pour ce match ?`, 'Déclarer forfait')) return;
-    commitResult(m, x => { applyDetails(x); Object.assign(x, { score: null, sets: null, tab: null, live: false, forfeit: side, winner: side === 'a' ? 'b' : 'a', done: true, doneAt: Date.now() }); });
+    commitResult(m, x => { applyDetails(x); Object.assign(x, { score: null, sets: null, tab: null, live: false, liveScore: null, forfeit: side, winner: side === 'a' ? 'b' : 'a', done: true, doneAt: Date.now() }); });
   },
   async mmClear() {
     const m = mById(ui.mm);
@@ -1954,7 +2011,7 @@ document.addEventListener('input', e => {
 });
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && document.getElementById('modal').innerHTML && !document.getElementById('confirm').innerHTML) closeModal();
-  if (e.key === 'Enter' && ui.mm && e.target.tagName === 'INPUT' && document.getElementById('mmsum')) { e.preventDefault(); A.mmSave(); }
+  if (e.key === 'Enter' && ui.mm && e.target.tagName === 'INPUT' && document.getElementById('mmsum')) { e.preventDefault(); const mm = mById(ui.mm); mm && mm.live && !mm.done ? A.mmLiveSave() : A.mmSave(); }
   // Tab après une saisie complétée automatiquement : on passe directement au set suivant
   if (e.key === 'Tab' && !e.shiftKey && ui.mm) {
     const r = /^s(\d+)a$/.exec(e.target.id), other = r && document.getElementById(`s${r[1]}b`);
@@ -2003,7 +2060,7 @@ function displayPanels(t) {
       if (live) ms.splice(ms.indexOf(live), 1), ms.unshift(live);
       const m = ms[0];
       return `<div class="d-court ${m.live ? 'live' : ''}"><h3><span>${esc(c)}</span><span>${m.live ? '<span class="d-live">● EN COURS</span>' : fmtTime(m.time)}</span></h3>
-        <div class="d-match"><div>${srcTag(m.a)}</div><span class="vs">contre</span><div>${srcTag(m.b)}</div></div>
+        <div class="d-match"><div>${srcTag(m.a)}</div>${m.live && liveScoreHTML(t, m) ? `<span class="d-score">${liveScoreHTML(t, m)}</span>` : '<span class="vs">contre</span>'}<div>${srcTag(m.b)}</div></div>
         <div class="d-meta">M${m.num} · ${esc(matchLabel(t, m))}${m.referee ? ' · Arbitre : ' + esc(tname(m.referee)) : ''}</div>
         ${ms.slice(1, 3).map(n => `<div class="d-next">${fmtTime(n.time)} · ${srcTag(n.a)} – ${srcTag(n.b)}${n.referee ? ` <span style="color:#8fa0bb">(arb. ${esc(tname(n.referee))})</span>` : ''}</div>`).join('')}</div>`;
     }).join('');
