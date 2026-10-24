@@ -19,6 +19,8 @@ Application en ligne : https://aucunlien34.github.io/tournoi-manager/
 5. **Temps de jeu équilibré** : le planificateur donne la priorité aux équipes qui attendent depuis le plus longtemps, évite les enchaînements et compare 40 variantes pour garder la meilleure ; la finale est jouée seule au dernier créneau.
 6. **Téléphone et tablette** : onglets fixes et défilants, listes compactes, planning en liste, saisie des scores plein écran avec grands champs ; affichage PC inchangé.
 7. **Feuilles de terrain (PDF)** : pour la phase en cours, une page A4 par terrain avec cases pour noter les scores à la main (par set en volley), arbitre, lignes à remplir pour les équipes pas encore connues.
+8. **Application installable** (Android, iPhone, ordinateur) avec logo, fonctionnement hors ligne.
+9. **Type de score « Au temps »**, durée de match réglée dans Format & points, complétion automatique des scores de set, onglet Classement général séparé.
 
 ## Pistes
 - Saisie des scores par les arbitres sur téléphone (nécessiterait un serveur).

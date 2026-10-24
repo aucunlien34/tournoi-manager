@@ -4,6 +4,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Tournoi Manager</title>
+<meta name="description" content="Gestion de tournois de sports collectifs pour l'organisateur">
+<meta name="theme-color" content="#1f4fd1">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Tournoi">
 <style>
 :root{
   --bg:#f3f5f9; --panel:#fff; --text:#1b2330; --muted:#677489; --line:#e2e7ef; --chip:#edf1f7;
@@ -75,6 +85,10 @@ h3{font-size:16px;margin-bottom:10px}
 /* home */
 .hero{padding:34px 0 20px}
 .hero h1{font-size:28px}
+.brand{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.logo{width:52px;height:52px;border-radius:12px;box-shadow:0 4px 12px rgba(31,79,209,.3)}
+.home-btn{display:inline-flex;align-items:center;gap:6px;padding:4px 8px}
+.logo-sm{width:30px;height:30px;border-radius:7px}
 .tcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px;margin-top:18px}
 .tcard{cursor:pointer}
 .tcard:hover{border-color:var(--accent)}
@@ -1077,8 +1091,8 @@ function render() {
 }
 function viewHome() {
   const list = Object.values(db.tournaments).sort((a, b) => b.updatedAt - a.updatedAt);
-  return `<div class="hero"><h1>🏆 Tournoi Manager</h1><p class="muted">Organisez vos tournois de sports collectifs : poules, brassage, niveaux, phases finales, planning, arbitrage et écran public.</p>
-    <div class="row"><button class="primary" data-act="newT">+ Nouveau tournoi</button><button data-act="importClick">Importer un fichier…</button>${list.length ? '<button data-act="exportAll">Exporter tous les tournois</button>' : ''}</div></div>
+  return `<div class="hero"><div class="brand"><img src="icon.svg" alt="" class="logo"><h1>Tournoi Manager</h1></div><p class="muted">Organisez vos tournois de sports collectifs : poules, brassage, niveaux, phases finales, planning, arbitrage et écran public.</p>
+    <div class="row"><button class="primary" data-act="newT">+ Nouveau tournoi</button><button data-act="importClick">Importer un fichier…</button>${list.length ? '<button data-act="exportAll">Exporter tous les tournois</button>' : ''}${installBtn()}</div></div>
     ${list.length ? `<div class="tcards">${list.map(t => {
       const fr = finalRanking(t === T() ? t : t) ;
       return `<div class="card tcard" data-act="openT" data-id="${t.id}"><h3>${esc(t.name)}</h3>
@@ -1088,6 +1102,28 @@ function viewHome() {
       <button class="sm ghost danger" data-act="delT" data-id="${t.id}">Supprimer</button></div></div>`; }).join('')}</div>`
     : `<div class="card"><p>Aucun tournoi pour l'instant. Créez-en un pour commencer.</p></div>`}
     <p class="muted small" style="margin-top:28px">Les données sont enregistrées automatiquement dans ce navigateur, avec des sauvegardes de secours. Pensez à exporter un fichier de temps en temps, ou à lier un fichier de sauvegarde automatique (menu Sauvegardes d'un tournoi).</p>`;
+}
+/* installation sur l'écran d'accueil (Android / ordinateur : invite du navigateur ; iPhone : mode d'emploi) */
+let installPrompt = null;
+const isStandalone = () => (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+function installBtn() {
+  if (isStandalone()) return '';
+  if (installPrompt || isIOS()) return '<button data-act="install">📲 Installer l\'app</button>';
+  return '';
+}
+async function installApp() {
+  if (installPrompt) {
+    installPrompt.prompt();
+    const r = await installPrompt.userChoice; installPrompt = null; render();
+    if (r.outcome === 'accepted') toast('Application installée.');
+    return;
+  }
+  showModal(`<h3>Installer sur iPhone / iPad</h3><ol style="line-height:1.9;padding-left:20px">
+    <li>Ouvrez cette page dans <b>Safari</b>.</li><li>Touchez le bouton <b>Partager</b> (carré avec une flèche vers le haut).</li>
+    <li>Choisissez <b>Sur l'écran d'accueil</b>, puis <b>Ajouter</b>.</li></ol>
+    <div class="note warn">Sur iPhone, l'app installée garde ses données à part de Safari : pour retrouver un tournoi créé dans Safari, exportez-le puis importez-le dans l'app.</div>
+    <div class="actions"><button class="primary" data-act="modalClose">Compris</button></div>`);
 }
 function tStatusBadge(t) {
   const total = t.matches.length, done = t.matches.filter(m => m.done).length;
@@ -1100,7 +1136,7 @@ function viewTournament() {
   const tabs = [['config', 'Configuration'], ['matches', 'Matchs'], ['standings', 'Classements'], ...(generalPhases(t).length ? [['general', 'Classement général']] : []), ...(hasBracket ? [['bracket', 'Tableaux']] : []), ['planning', 'Planning'], ['final', 'Classement final']];
   if (!tabs.some(x => x[0] === ui.tab)) ui.tab = 'config';
   const body = { config: viewConfig, matches: viewMatches, standings: viewStandings, general: viewGeneral, bracket: viewBrackets, planning: viewPlanning, final: viewFinal }[ui.tab](t);
-  return `<header class="top"><button class="ghost" data-act="home">‹ Tournois</button>
+  return `<header class="top"><button class="ghost home-btn" data-act="home" title="Tous les tournois">‹ <img src="icon.svg" alt="" class="logo-sm"></button>
     <div class="ttl"><h1>${esc(t.name)}</h1><div class="muted small">${esc((SPORTS[t.sport] || SPORTS.other).name)} · ${t.teams.length} équipes${t.date ? ' · ' + fmtDate(t.date) : ''}${t.place ? ' · ' + esc(t.place) : ''}</div></div>
     <div class="row top-actions">${tStatusBadge(t)}<button data-act="display" class="hide-sm">📺 Écran public</button><button data-act="pdf">📄 PDF</button><button data-act="backups">💾 Sauvegardes${fileHandle ? ' ✓' : ''}</button></div></header>
     <nav class="tabs">${tabs.map(([k, l]) => `<button class="${ui.tab === k ? 'on' : ''}" data-act="tab" data-k="${k}">${l}</button>`).join('')}</nav>
@@ -1760,6 +1796,7 @@ const A = {
   display() { window.open(location.pathname + location.search + '#ecran', 'tournoi-ecran', 'width=1280,height=720'); },
   backups() { backupsModal(); },
   pdf() { pdfModal(); },
+  install() { installApp(); },
   pdfGo() {
     const t = T(), keys = [...document.querySelectorAll('[data-pdf]:checked')].map(x => x.dataset.pdf);
     if (!keys.length) return toast('Cochez au moins un élément.');
@@ -2010,6 +2047,7 @@ function scheduleRotate() {
 }
 
 /* ---------- démarrage ---------- */
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => {});
 if (DISPLAY) {
   document.title = 'Écran public — Tournoi Manager';
   renderDisplay(); scheduleRotate();
@@ -2019,6 +2057,8 @@ if (DISPLAY) {
   document.addEventListener('fullscreenchange', renderDisplay);
 } else {
   if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+  window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installPrompt = e; if (ui.view === 'home') render(); });
+  window.addEventListener('appinstalled', () => { installPrompt = null; render(); });
   window.addEventListener('storage', e => { if (e.key === KEY && !document.getElementById('modal').innerHTML) { db = loadDb(); invalidate(); render(); } });
   render();
 }
