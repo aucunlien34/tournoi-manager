@@ -31,6 +31,9 @@ html,body{margin:0}
 body{background:var(--bg);color:var(--text);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 button,input,select,textarea{font:inherit;color:inherit;touch-action:manipulation}
 .mrow,.pm,.bm,.tabs button,.subtabs button,.wstep,.tpl{touch-action:manipulation}
+select{max-width:100%;text-overflow:ellipsis}
+.card,.grid2>*,.field{min-width:0}
+.field>select,.field>input:not([type=checkbox]):not([type=color]){width:100%}
 input,select,textarea{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:7px 9px;min-width:0}
 input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:transparent}
 input[type=checkbox],input[type=radio]{width:18px;height:18px;accent-color:var(--accent);vertical-align:middle;margin:0 6px 0 0}
@@ -121,8 +124,13 @@ h3{font-size:16px;margin-bottom:10px}
 .next .lab{font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--accent)}
 .next.ok{background:var(--ok-soft)}
 .next.ok .lab{font-size:16px}
-.wizard{display:flex;gap:4px;overflow-x:auto;margin-bottom:14px;padding:6px 0;scrollbar-width:none;position:sticky;top:var(--tabs-h,46px);z-index:5;background:var(--bg);border-bottom:1px solid transparent}
-.wizard.stuck{border-bottom-color:var(--line);box-shadow:0 6px 8px -8px rgba(16,24,40,.25)}
+.wz-wrap{position:sticky;top:var(--tabs-h,46px);z-index:5;background:var(--bg);margin-bottom:14px;display:flex;align-items:center;border-bottom:1px solid transparent}
+.wz-wrap.stuck{border-bottom-color:var(--line);box-shadow:0 6px 8px -8px rgba(16,24,40,.25)}
+.wizard{display:flex;gap:4px;overflow-x:auto;padding:6px 0;scrollbar-width:none;flex:1;min-width:0;scroll-behavior:smooth}
+.wizard::-webkit-scrollbar{display:none}
+.wz-arrow{flex:none;width:32px;height:32px;padding:0;border-radius:50%;font-size:18px;font-weight:700;line-height:1;color:var(--accent);background:var(--panel);box-shadow:var(--shadow);display:inline-flex;align-items:center;justify-content:center;visibility:hidden}
+.wz-wrap.can-l .wz-arrow.l,.wz-wrap.can-r .wz-arrow.r{visibility:visible}
+@media (min-width:701px){.wz-arrow{display:none}}
 .wstep{display:inline-flex;align-items:center;gap:7px;border:0;background:none;padding:6px 10px 6px 6px;border-radius:20px;color:var(--muted);white-space:nowrap;font-weight:600}
 .wstep i{width:26px;height:26px;border-radius:50%;background:var(--chip);display:inline-flex;align-items:center;justify-content:center;font-style:normal;font-weight:700;flex:none}
 .wstep.seen i{background:var(--ok-soft);color:var(--ok)}
@@ -364,7 +372,7 @@ body.display #app{max-width:none;padding:0;height:100vh;display:flex;flex-direct
   .top-actions{width:100%;flex-wrap:nowrap}
   .top-actions button{flex:1;padding:8px 6px}
   .tabs{margin:0 -10px 12px;padding:0 4px;scrollbar-width:none}
-  .wizard{margin:0 -10px 12px;padding:6px 10px}
+  .wz-wrap{margin:0 -10px 12px;padding:0 6px;gap:4px}
   .tabs button{padding:11px 10px;font-size:14px}
   .subtabs{flex-wrap:nowrap;overflow-x:auto;margin:0 -10px 12px;padding:0 10px 4px;scrollbar-width:none}
   .card{padding:12px;border-radius:8px}
@@ -1184,9 +1192,16 @@ function selOr(path, choices, attrs = '', unit = '') {
 }
 
 /* ---------- rendu principal ---------- */
+/* flèches du menu des étapes : visibles seulement s'il reste des étapes hors écran de ce côté */
+function wzArrows() {
+  const wrap = app.querySelector('.wz-wrap'), wz = wrap && wrap.querySelector('.wizard'); if (!wz) return;
+  wrap.classList.toggle('can-l', wz.scrollLeft > 2);
+  wrap.classList.toggle('can-r', wz.scrollLeft + wz.clientWidth < wz.scrollWidth - 2);
+}
 function stickyNav() {
   const tabs = app.querySelector('.tabs'); if (tabs) document.documentElement.style.setProperty('--tabs-h', tabs.offsetHeight + 'px');
-  const wz = app.querySelector('.wizard'); if (wz) wz.classList.toggle('stuck', wz.getBoundingClientRect().top <= tabs.offsetHeight + 1 && window.scrollY > 0);
+  const wrap = app.querySelector('.wz-wrap'); if (wrap) wrap.classList.toggle('stuck', wrap.getBoundingClientRect().top <= tabs.offsetHeight + 1 && window.scrollY > 0);
+  wzArrows();
 }
 window.addEventListener('scroll', () => { if (!DISPLAY) stickyNav(); }, { passive: true });
 window.addEventListener('resize', () => { if (!DISPLAY) stickyNav(); });
@@ -1194,7 +1209,12 @@ function render() {
   if (DISPLAY) return renderDisplay();
   const ae = document.activeElement, key = ae && ae !== document.body ? (ae.dataset.bind || ae.dataset.k || ae.id) : null;
   if (ui.view === 'home' || !T()) { ui.view = 'home'; app.innerHTML = viewHome(); }
-  else { app.innerHTML = viewTournament(); stickyNav(); }
+  else {
+    app.innerHTML = viewTournament();
+    const wz = app.querySelector('.wizard'), on = wz && wz.querySelector('.wstep.on');
+    if (on) { wz.style.scrollBehavior = 'auto'; const r = on.getBoundingClientRect(), b = wz.getBoundingClientRect(); wz.scrollLeft += r.left - b.left - (b.width - r.width) / 2; wz.style.scrollBehavior = ''; wz.addEventListener('scroll', wzArrows, { passive: true }); }
+    stickyNav();
+  }
   if (key) {
     const el = app.querySelector(`[data-bind="${CSS.escape(key)}"]`) || app.querySelector(`[data-k="${CSS.escape(key)}"]`) || document.getElementById(key);
     if (el && el.focus) { el.focus(); if (el.type === 'text' || el.type === 'search') { const l = el.value.length; try { el.setSelectionRange(l, l); } catch (e) {} } }
@@ -1286,7 +1306,7 @@ function viewTournament() {
 function viewPrep(t) {
   if (!PREP_STEPS.some(s => s[0] === ui.cfg)) ui.cfg = 'general';
   const idx = PREP_STEPS.findIndex(s => s[0] === ui.cfg), st = started(t);
-  const stepper = `<div class="wizard">${PREP_STEPS.map(([k, l], i) => `<button class="wstep ${i === idx ? 'on' : ''} ${i < idx || st ? 'seen' : ''}" data-act="cfg" data-k="${k}"><i>${i + 1}</i><span>${l}</span></button>`).join('')}</div>`;
+  const stepper = `<div class="wz-wrap"><button class="wz-arrow l" data-act="wzScroll" data-d="-1" aria-label="Étapes précédentes">‹</button><div class="wizard">${PREP_STEPS.map(([k, l], i) => `<button class="wstep ${i === idx ? 'on' : ''} ${i < idx || st ? 'seen' : ''}" data-act="cfg" data-k="${k}"><i>${i + 1}</i><span>${l}</span></button>`).join('')}</div><button class="wz-arrow r" data-act="wzScroll" data-d="1" aria-label="Étapes suivantes">›</button></div>`;
   const body = { general: cfgGeneral, format: cfgFormat, teams: cfgTeams, phases: cfgPhases, sched: cfgSched, launch: cfgLaunch }[ui.cfg](t);
   const prev = PREP_STEPS[idx - 1], next = PREP_STEPS[idx + 1];
   const nav = `<div class="step-nav">${prev ? `<button data-act="cfg" data-k="${prev[0]}">‹ ${prev[1]}</button>` : '<span></span>'}<span class="muted small">Étape ${idx + 1} / ${PREP_STEPS.length}</span>${next ? `<button class="primary" data-act="cfg" data-k="${next[0]}">${next[1]} ›</button>` : '<span></span>'}</div>`;
@@ -2030,6 +2050,7 @@ const A = {
   importClick() { document.getElementById('importFile').click(); },
   tab(el) { ui.tab = el.dataset.k; render(); window.scrollTo(0, 0); },
   cfg(el) { ui.cfg = el.dataset.k; render(); window.scrollTo(0, 0); },
+  wzScroll(el) { const wz = app.querySelector('.wizard'); wz.scrollBy({ left: Number(el.dataset.d) * wz.clientWidth * 0.7, behavior: 'smooth' }); },
   mt(el) { ui.mt = el.dataset.k; render(); },
   res(el) { ui.res = el.dataset.k; render(); },
   goto(el) { ui.tab = el.dataset.tab; const s = el.dataset.sub; if (s) { if (ui.tab === 'prep') ui.cfg = s; else if (ui.tab === 'matches') ui.mt = s; else ui.res = s; } render(); window.scrollTo(0, 0); },
